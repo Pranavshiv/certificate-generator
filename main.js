@@ -103,8 +103,8 @@ function parseCSV(csv) {
   const periodIdx = headers.indexOf('period');
   const collegeIdx = headers.indexOf('college');
 
-  if (nameIdx === -1 || courseIdx === -1 || periodIdx === -1) {
-    throw new Error('CSV must contain name, course, period columns. College column is optional.');
+  if (nameIdx === -1 || courseIdx === -1 || periodIdx === -1 || collegeIdx === -1) {
+    throw new Error('CSV must contain name, course, period, and college columns');
   }
 
   return lines.slice(1).map(row => {
@@ -113,7 +113,7 @@ function parseCSV(csv) {
       name: cols[nameIdx] || '',
       course: cols[courseIdx] || '',
       period: cols[periodIdx] || '',
-      college: collegeIdx !== -1 ? cols[collegeIdx] || '' : ''
+      college: cols[collegeIdx] || ''
     };
   });
 }
