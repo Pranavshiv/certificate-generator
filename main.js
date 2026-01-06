@@ -34,9 +34,6 @@ const courseNameEl = document.getElementById('courseName');
 const collegeNameEl = document.getElementById('collegeName');
 const periodTextEl = document.getElementById('periodText');
 
-const certTitleEl = document.getElementById('certTitle');
-const subtitleTopEl = document.getElementById('subtitleTop');
-const subtitleBottomEl = document.getElementById('subtitleBottom');
 const customTextEl = document.getElementById('customText');
 const customTextDisplayEl = document.getElementById('customTextDisplay');
 
@@ -170,20 +167,6 @@ sign2FileInput.addEventListener('change', e => {
 // Preview Update
 // =====================
 function updatePreview(record) {
-  const modeEl = document.querySelector('input[name="certMode"]:checked');
-  const mode = modeEl ? modeEl.value : 'completed';
-
-  // Title and subtitle differ by mode
-  if (mode === 'participation') {
-    certTitleEl.textContent = 'CERTIFICATE OF PARTICIPATION';
-    subtitleTopEl.textContent = 'This is to certify that';
-    subtitleBottomEl.textContent = 'has participated in';
-  } else {
-    certTitleEl.textContent = 'CERTIFICATE OF COMPLETION';
-    subtitleTopEl.textContent = 'This is proudly presented to';
-    subtitleBottomEl.textContent = 'for successfully completing';
-  }
-
   studentNameEl.textContent = record.name || 'Student Name';
   courseNameEl.textContent = record.course || 'Course Name';
   collegeNameEl.textContent = record.college || 'College Name';
