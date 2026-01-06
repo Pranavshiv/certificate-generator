@@ -27,35 +27,52 @@
         <p>Bulk & Automatic Certificates</p>
       </div>
     </div>
+    <div class="progress-indicator">
+      <div class="progress-step completed" data-step="1"><span>1</span></div>
+      <div class="progress-line"></div>
+      <div class="progress-step completed" data-step="2"><span>2</span></div>
+      <div class="progress-line"></div>
+      <div class="progress-step completed" data-step="3"><span>3</span></div>
+      <div class="progress-line"></div>
+      <div class="progress-step active" data-step="5"><span>4</span></div>
+    </div>
   </header>
 
   <main class="app-main">
 
     <!-- STEP 1 : DATA -->
-    <section class="panel">
-      <h2 class="panel-title">Step 1 · Upload CSV</h2>
+    <section class="panel step-panel" data-step="1">
+      <div class="panel-header">
+        <h2 class="panel-title">Step 1 · Upload CSV</h2>
+        <span class="step-status" id="step1Status"></span>
+      </div>
 
       <div class="field">
-        <label>Student Data (CSV)</label>
+        <label>Student Data (CSV) <span class="required">*</span></label>
         <div class="file-input">
           <input type="file" id="dataFile" accept=".csv" />
+          <span class="file-input-hint">📎 Click to select CSV file</span>
         </div>
-        <p class="hint">Required columns: name, course, period, college</p>
+        <p class="hint">Required columns: <strong>name</strong>, <strong>course</strong>, <strong>period</strong>, <strong>college</strong></p>
         <p id="csvStatus" class="status"></p>
       </div>
     </section>
 
     <!-- STEP 2 : BRANDING -->
-    <section class="panel">
-      <h2 class="panel-title">Step 2 · Branding</h2>
+    <section class="panel step-panel" data-step="2">
+      <div class="panel-header">
+        <h2 class="panel-title">Step 2 · Branding</h2>
+        <span class="step-status" id="step2Status"></span>
+      </div>
 
       <div class="grid-2">
 
         <!-- LOGO -->
         <div class="field">
-          <label>Logo</label>
+          <label>Logo <span class="tooltip-icon" title="Recommended: PNG, max 200x100px">ℹ️</span></label>
           <div class="file-input">
             <input type="file" id="logoFile" accept="image/*" />
+            <span class="file-input-hint">📎 Click to select logo</span>
           </div>
           <div class="preview-box">
             <span class="preview-label">Logo Preview</span>
@@ -65,9 +82,10 @@
 
         <!-- SIGNATURE 1 -->
         <div class="field">
-          <label>Authorized Signature 1</label>
+          <label>Authorized Signature 1 <span class="tooltip-icon" title="PNG/JPG recommended, transparent background">ℹ️</span></label>
           <div class="file-input">
             <input type="file" id="signFile" accept="image/*" />
+            <span class="file-input-hint">📎 Click to select signature</span>
           </div>
           <div class="preview-box">
             <span class="preview-label">Signature 1 Preview</span>
@@ -77,9 +95,10 @@
 
         <!-- SIGNATURE 2 -->
         <div class="field">
-          <label>Authorized Signature 2</label>
+          <label>Authorized Signature 2 <span class="tooltip-icon" title="Optional second signature">ℹ️</span></label>
           <div class="file-input">
             <input type="file" id="signFile2" accept="image/*" />
+            <span class="file-input-hint">📎 Click to select signature</span>
           </div>
           <div class="preview-box">
             <span class="preview-label">Signature 2 Preview</span>
@@ -91,19 +110,25 @@
     </section>
 
     <!-- CUSTOM TEXT -->
-    <section class="panel">
-      <h2 class="panel-title">Step 3 · Custom Content</h2>
+    <section class="panel step-panel" data-step="3">
+      <div class="panel-header">
+        <h2 class="panel-title">Step 3 · Custom Content</h2>
+        <span class="step-status" id="step3Status">✓ Optional</span>
+      </div>
       <div class="field">
-        <label>Add Custom Text (Optional)</label>
-        <textarea id="customText" placeholder="Enter any additional text to display on the certificate..." style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:rgba(15,23,42,0.9);color:var(--text);font-family:inherit;font-size:13px;min-height:80px;resize:vertical;"></textarea>
-        <p class="hint">This text will appear on all generated certificates</p>
+        <label>Add Custom Text (Optional) <span class="tooltip-icon" title="Additional text to display on certificate">ℹ️</span></label>
+        <textarea id="customText" placeholder="E.g., 'Awarded for outstanding performance' or 'Valid from Jan 2026 to Dec 2026'" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:rgba(15,23,42,0.9);color:var(--text);font-family:inherit;font-size:13px;min-height:80px;resize:vertical;"></textarea>
+        <p class="hint">📝 This text will appear on all generated certificates</p>
       </div>
     </section>
 
     <!-- TEMPLATE EDITOR -->
-    <section class="panel">
-      <h2 class="panel-title">Step 3b · Template Editor</h2>
-      <p class="hint">Click on elements in the preview below to edit their properties</p>
+    <section class="panel step-panel" data-step="3b">
+      <div class="panel-header">
+        <h2 class="panel-title">Step 3b · Customize Template</h2>
+        <span class="step-status" id="step3bStatus">✓ Optional</span>
+      </div>
+      <p class="hint">👆 Click certificate elements below to customize their appearance, or select from dropdown</p>
       <div class="grid-2">
         <div class="field">
           <label>Selected Element</label>
@@ -140,20 +165,26 @@
     </section>
 
     <!-- ACTIONS -->
-    <section class="panel">
-      <h2 class="panel-title">Step 5 · Generate</h2>
+    <section class="panel step-panel" data-step="5">
+      <div class="panel-header">
+        <h2 class="panel-title">Step 4 · Generate Certificates</h2>
+        <span class="step-status" id="step5Status"></span>
+      </div>
       <div class="field">
-        <label>Certificate Mode</label>
-        <div class="file-input" style="display:flex;gap:8px;align-items:center;">
-          <label style="font-size:13px"><input type="radio" name="certMode" value="completed" checked> Course Completed</label>
-          <label style="font-size:13px"><input type="radio" name="certMode" value="participation"> Participation</label>
+        <label>Certificate Mode <span class="tooltip-icon" title="Choose certificate type">ℹ️</span></label>
+        <div class="mode-selector">
+          <label class="mode-option"><input type="radio" name="certMode" value="completed" checked> <span>🎓 Course Completed</span></label>
+          <label class="mode-option"><input type="radio" name="certMode" value="participation"> <span>👏 Participation</span></label>
         </div>
       </div>
 
       <div class="actions">
-        <button id="generateBtn" type="button" disabled>Generate all certificates</button>
+        <button id="generateBtn" type="button" disabled class="btn-primary">
+          <span class="btn-icon">⚡</span> Generate All Certificates
+        </button>
         <span id="recordsBadge" class="badge">0 records</span>
       </div>
+      <p class="hint" id="generateHint" style="display:none;">🎉 All steps complete! Click above to generate certificates.</p>
     </section>
 
     <!-- CERTIFICATE PREVIEW -->

@@ -5,6 +5,8 @@ let csvData = [];
 let logoImg = null;
 let sign1ImgData = null;
 let sign2ImgData = null;
+let logoUploaded = false;
+let customTextAdded = false;
 
 // Template styling storage
 let templateConfig = {
@@ -50,6 +52,37 @@ const posXInput = document.getElementById('posX');
 const posYInput = document.getElementById('posY');
 const resetTemplateBtn = document.getElementById('resetTemplateBtn');
 
+// Step status elements
+const step1Status = document.getElementById('step1Status');
+const step2Status = document.getElementById('step2Status');
+const step3Status = document.getElementById('step3Status');
+const step5Status = document.getElementById('step5Status');
+const generateHint = document.getElementById('generateHint');
+
+// =====================
+// Step Status Update
+// =====================
+function updateStepStatus() {
+  if (csvData.length > 0) {
+    step1Status.textContent = '✓ Complete';
+    step1Status.style.background = 'rgba(34, 197, 94, 0.2)';
+    step1Status.style.color = '#22c55e';
+  }
+  if (logoUploaded) {
+    step2Status.textContent = '✓ Complete';
+    step2Status.style.background = 'rgba(34, 197, 94, 0.2)';
+    step2Status.style.color = '#22c55e';
+  }
+  if (customTextAdded) {
+    step3Status.textContent = '✓ Added';
+    step3Status.style.background = 'rgba(34, 197, 94, 0.2)';
+    step3Status.style.color = '#22c55e';
+  }
+  if (csvData.length > 0) {
+    step5Status.textContent = 'Ready';
+    generateHint.style.display = generateBtn.disabled ? 'none' : 'block';
+  }
+}
 
 // =====================
 // CSV Upload Handler
@@ -80,6 +113,7 @@ function handleCSVUpload(e) {
 
       updatePreview(csvData[0]);
       generateBtn.disabled = false;
+      updateStepStatus();
 
     } catch (err) {
       csvStatus.textContent = `❌ ${err.message}`;
@@ -128,6 +162,8 @@ logoFileInput.addEventListener('change', e => {
     logoImg = ev.target.result;
     logoImgEl.src = logoImg;
     document.getElementById('logoImg').src = logoImg;
+    logoUploaded = true;
+    updateStepStatus();
   };
   reader.readAsDataURL(file);
 });
@@ -176,11 +212,18 @@ function updatePreview(record) {
   customTextDisplayEl.textContent = customTextEl.value;
 }
 
+// Track custom text input
+customTextEl.addEventListener('input', () => {
+  customTextAdded = customTextEl.value.length > 0;
+  updatePreview(csvData.length > 0 ? csvData[0] : { name: 'Student Name', course: 'Course Name', college: 'College Name', period: '' });
+  updateStepStatus();
+});
+
 // update preview when mode changes
 document.querySelectorAll('input[name="certMode"]').forEach(r => {
   r.addEventListener('change', () => {
     if (csvData && csvData.length > 0) updatePreview(csvData[0]);
-    else updatePreview({ name: 'Student Name', course: 'Course Name', period: '' });
+    else updatePreview({ name: 'Student Name', course: 'Course Name', college: 'College Name', period: '' });
   });
 });
 
