@@ -104,7 +104,7 @@ function parseCSV(csv) {
   const collegeIdx = headers.indexOf('college');
 
   if (nameIdx === -1 || courseIdx === -1 || periodIdx === -1) {
-    throw new Error('CSV must contain name, course, period columns');
+    throw new Error('CSV must contain name, course, period columns. College column is optional.');
   }
 
   return lines.slice(1).map(row => {
