@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Automatic Certificate Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- html2canvas -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-logo">🎓</div>
+      <div class="brand-text">
+        <h1>Certificate Generator</h1>
+        <p>Bulk & Automatic Certificates</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+
+    <!-- STEP 1 : DATA -->
+    <section class="panel">
+      <h2 class="panel-title">Step 1 · Upload CSV</h2>
+
+      <div class="field">
+        <label>Student Data (CSV)</label>
+        <div class="file-input">
+          <input type="file" id="dataFile" accept=".csv" />
+        </div>
+        <p class="hint">Required columns: name, course, period</p>
+        <p id="csvStatus" class="status"></p>
+      </div>
+    </section>
+
+    <!-- STEP 2 : BRANDING -->
+    <section class="panel">
+      <h2 class="panel-title">Step 2 · Branding</h2>
+
+      <div class="grid-2">
+
+        <!-- LOGO -->
+        <div class="field">
+          <label>Logo</label>
+          <div class="file-input">
+            <input type="file" id="logoFile" accept="image/*" />
+          </div>
+          <div class="preview-box">
+            <span class="preview-label">Logo Preview</span>
+            <img id="logoPreview" class="preview-img" />
+          </div>
+        </div>
+
+        <!-- SIGNATURE 1 -->
+        <div class="field">
+          <label>Authorized Signature 1</label>
+          <div class="file-input">
+            <input type="file" id="signFile" accept="image/*" />
+          </div>
+          <div class="preview-box">
+            <span class="preview-label">Signature 1 Preview</span>
+            <img id="signPreview" class="preview-img" />
+          </div>
+        </div>
+
+        <!-- SIGNATURE 2 -->
+        <div class="field">
+          <label>Authorized Signature 2</label>
+          <div class="file-input">
+            <input type="file" id="signFile2" accept="image/*" />
+          </div>
+          <div class="preview-box">
+            <span class="preview-label">Signature 2 Preview</span>
+            <img id="signPreview2" class="preview-img" />
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CUSTOM TEXT -->
+    <section class="panel">
+      <h2 class="panel-title">Step 3 · Custom Content</h2>
+      <div class="field">
+        <label>Add Custom Text (Optional)</label>
+        <textarea id="customText" placeholder="Enter any additional text to display on the certificate..." style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:rgba(15,23,42,0.9);color:var(--text);font-family:inherit;font-size:13px;min-height:80px;resize:vertical;"></textarea>
+        <p class="hint">This text will appear on all generated certificates</p>
+      </div>
+    </section>
+
+    <!-- TEMPLATE EDITOR -->
+    <section class="panel">
+      <h2 class="panel-title">Step 3b · Template Editor</h2>
+      <p class="hint">Click on elements in the preview below to edit their properties</p>
+      <div class="grid-2">
+        <div class="field">
+          <label>Selected Element</label>
+          <select id="elementSelect" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:rgba(15,23,42,0.9);color:var(--text);">
+            <option value="">Click element in preview</option>
+            <option value="certTitle">Title</option>
+            <option value="studentName">Student Name</option>
+            <option value="courseName">Course Name</option>
+            <option value="customTextDisplay">Custom Text</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Font Size</label>
+          <input type="range" id="fontSize" min="10" max="60" value="24" style="width:100%;">
+          <span id="fontSizeValue" style="font-size:12px;color:var(--muted);">24px</span>
+        </div>
+        <div class="field">
+          <label>Text Color</label>
+          <input type="color" id="textColor" value="#1e293b" style="width:100%;height:40px;border:none;border-radius:6px;cursor:pointer;">
+        </div>
+        <div class="field">
+          <label>X Position</label>
+          <input type="number" id="posX" min="0" value="0" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:rgba(15,23,42,0.9);color:var(--text);">
+        </div>
+        <div class="field">
+          <label>Y Position</label>
+          <input type="number" id="posY" min="0" value="0" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:rgba(15,23,42,0.9);color:var(--text);">
+        </div>
+        <div class="field">
+          <button id="resetTemplateBtn" type="button" style="width:100%;background:rgba(149,21,21,0.8);">Reset to Default</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACTIONS -->
+    <section class="panel">
+      <h2 class="panel-title">Step 5 · Generate</h2>
+      <div class="field">
+        <label>Certificate Mode</label>
+        <div class="file-input" style="display:flex;gap:8px;align-items:center;">
+          <label style="font-size:13px"><input type="radio" name="certMode" value="completed" checked> Course Completed</label>
+          <label style="font-size:13px"><input type="radio" name="certMode" value="participation"> Participation</label>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="generateBtn" type="button" disabled>Generate all certificates</button>
+        <span id="recordsBadge" class="badge">0 records</span>
+      </div>
+    </section>
+
+    <!-- CERTIFICATE PREVIEW -->
+    <section id="certificate-wrapper">
+      <div id="certificate">
+
+        <!-- TOP BORDER -->
+        <div class="cert-top-border"></div>
+
+        <!-- LOGO (top right) -->
+        <img id="logoImg" class="cert-logo" />
+
+        <!-- BODY -->
+        <div class="certificate-body">
+          <h2 id="certTitle" class="cert-element" data-element="certTitle">CERTIFICATE</h2>
+          <div class="cert-divider"></div>
+
+          <div class="cert-content">
+            <p id="subtitleTop" class="subtitle">This is proudly presented to</p>
+
+            <h1 id="studentName" class="cert-element" data-element="studentName">Student Name</h1>
+
+            <div class="cert-decorative">
+              <img id="decorativeImg" class="decorative-icon" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 20 L60 35 L75 35 L65 45 L70 60 L50 50 L30 60 L35 45 L25 35 L40 35 Z' fill='%23ff9500' opacity='0.3'/%3E%3C/svg%3E" alt="" />
+            </div>
+
+            <p id="subtitleBottom" class="subtitle">for successfully completing</p>
+
+            <h3 id="courseName" class="cert-element" data-element="courseName">Course Name</h3>
+
+            <p id="periodText" class="period-text">Period: dd/mm/yyyy - dd/mm/yyyy</p>
+
+            <p id="customTextDisplay" class="cert-element" data-element="customTextDisplay"></p>
+          </div>
+        </div>
+
+        <!-- SIGNATURES -->
+        <div class="signatures">
+          <div class="sign-box">
+            <img id="signImg" class="signature" />
+            <div class="sign-label">Authorized Signature</div>
+          </div>
+
+          <div class="sign-box">
+            <img id="signImg2" class="signature" />
+            <div class="sign-label">Authorized Signature</div>
+          </div>
+        </div>
+
+        <!-- BOTTOM BORDER -->
+        <div class="cert-bottom-border"></div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="app-footer">
+    © 2026 Automatic Certificate Generator
+  </footer>
+
+</div>
+
+<!-- MAIN JS -->
+<script src="main.js"></script>
+
+</body>
+</html>
