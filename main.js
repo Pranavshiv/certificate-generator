@@ -8,10 +8,11 @@ let sign2ImgData = null;
 
 // Template styling storage
 let templateConfig = {
-  certTitle: { fontSize: 56, color: '#1a1a1a', posX: 0, posY: 0 },
   studentName: { fontSize: 48, color: '#1a1a1a', posX: 0, posY: 0 },
   courseName: { fontSize: 28, color: '#333333', posX: 0, posY: 0 },
-  customTextDisplay: { fontSize: 14, color: '#333333', posX: 0, posY: 0 }
+  collegeName: { fontSize: 18, color: '#333333', posX: 0, posY: 0 },
+  customTextDisplay: { fontSize: 14, color: '#333333', posX: 0, posY: 0 },
+  periodText: { fontSize: 14, color: '#333333', posX: 0, posY: 0 }
 };
 
 let selectedElement = null;
@@ -30,6 +31,7 @@ const recordsBadge = document.getElementById('recordsBadge');
 
 const studentNameEl = document.getElementById('studentName');
 const courseNameEl = document.getElementById('courseName');
+const collegeNameEl = document.getElementById('collegeName');
 const periodTextEl = document.getElementById('periodText');
 
 const certTitleEl = document.getElementById('certTitle');
@@ -99,9 +101,10 @@ function parseCSV(csv) {
   const nameIdx = headers.indexOf('name');
   const courseIdx = headers.indexOf('course');
   const periodIdx = headers.indexOf('period');
+  const collegeIdx = headers.indexOf('college');
 
   if (nameIdx === -1 || courseIdx === -1 || periodIdx === -1) {
-    throw new Error('CSV must contain name, course, period');
+    throw new Error('CSV must contain name, course, period columns');
   }
 
   return lines.slice(1).map(row => {
@@ -109,7 +112,8 @@ function parseCSV(csv) {
     return {
       name: cols[nameIdx] || '',
       course: cols[courseIdx] || '',
-      period: cols[periodIdx] || ''
+      period: cols[periodIdx] || '',
+      college: collegeIdx !== -1 ? cols[collegeIdx] || '' : ''
     };
   });
 }
@@ -182,6 +186,7 @@ function updatePreview(record) {
 
   studentNameEl.textContent = record.name || 'Student Name';
   courseNameEl.textContent = record.course || 'Course Name';
+  collegeNameEl.textContent = record.college || 'College Name';
   periodTextEl.textContent = record.period ? `Period: ${record.period}` : 'Period: dd/mm/yyyy - dd/mm/yyyy';
   
   // update custom text display from textarea
@@ -329,10 +334,11 @@ function initTemplateEditor() {
     resetTemplateBtn.addEventListener('click', () => {
       if (confirm('Reset all template settings to default?')) {
         templateConfig = {
-          certTitle: { fontSize: 56, color: '#1a1a1a', posX: 0, posY: 0 },
           studentName: { fontSize: 48, color: '#1a1a1a', posX: 0, posY: 0 },
           courseName: { fontSize: 28, color: '#333333', posX: 0, posY: 0 },
-          customTextDisplay: { fontSize: 14, color: '#333333', posX: 0, posY: 0 }
+          collegeName: { fontSize: 18, color: '#333333', posX: 0, posY: 0 },
+          customTextDisplay: { fontSize: 14, color: '#333333', posX: 0, posY: 0 },
+          periodText: { fontSize: 14, color: '#333333', posX: 0, posY: 0 }
         };
         
         // apply defaults to all elements

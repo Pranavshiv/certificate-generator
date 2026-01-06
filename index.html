@@ -40,7 +40,7 @@
         <div class="file-input">
           <input type="file" id="dataFile" accept=".csv" />
         </div>
-        <p class="hint">Required columns: name, course, period</p>
+        <p class="hint">Required columns: name, course, period, college</p>
         <p id="csvStatus" class="status"></p>
       </div>
     </section>
@@ -109,10 +109,11 @@
           <label>Selected Element</label>
           <select id="elementSelect" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:rgba(15,23,42,0.9);color:var(--text);">
             <option value="">Click element in preview</option>
-            <option value="certTitle">Title</option>
             <option value="studentName">Student Name</option>
             <option value="courseName">Course Name</option>
+            <option value="collegeName">College Name</option>
             <option value="customTextDisplay">Custom Text</option>
+            <option value="periodText">Period</option>
           </select>
         </div>
         <div class="field">
@@ -166,6 +167,7 @@
           <h1 id="studentName" class="cert-element" data-element="studentName">Student Name</h1>
           <p id="customTextDisplay" class="cert-element" data-element="customTextDisplay"></p>
           <h3 id="courseName" class="cert-element" data-element="courseName">Course Name</h3>
+          <p id="collegeName" class="cert-element" data-element="collegeName">College Name</p>
           <p id="periodText" class="cert-element period-text" data-element="periodText">Period: dd/mm/yyyy - dd/mm/yyyy</p>
         </div>
       </div>
