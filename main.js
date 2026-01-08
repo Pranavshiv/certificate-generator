@@ -8,13 +8,17 @@ let sign2ImgData = null;
 let logoUploaded = false;
 let customTextAdded = false;
 
+// Image sizes (in percentage)
+let imageSizes = {
+  logo: 100,
+  sign1: 100,
+  sign2: 100
+};
+
 // Template styling storage
 let templateConfig = {
-  studentName: { fontSize: 48, color: '#1a1a1a', posX: 0, posY: 0 },
-  courseName: { fontSize: 28, color: '#333333', posX: 0, posY: 0 },
-  collegeName: { fontSize: 18, color: '#333333', posX: 0, posY: 0 },
-  customTextDisplay: { fontSize: 14, color: '#333333', posX: 0, posY: 0 },
-  periodText: { fontSize: 14, color: '#333333', posX: 0, posY: 0 }
+  studentName: { fontSize: 48, color: '#1a1a1a', posX: 0, posY: 0, width: 600, fontFamily: 'Poppins', bold: false },
+  customTextDisplay: { fontSize: 14, color: '#333333', posX: 0, posY: 0, width: 800, fontFamily: 'Poppins', bold: false }
 };
 
 let selectedElement = null;
@@ -32,9 +36,6 @@ const generateBtn = document.getElementById('generateBtn');
 const recordsBadge = document.getElementById('recordsBadge');
 
 const studentNameEl = document.getElementById('studentName');
-const courseNameEl = document.getElementById('courseName');
-const collegeNameEl = document.getElementById('collegeName');
-const periodTextEl = document.getElementById('periodText');
 
 const customTextEl = document.getElementById('customText');
 const customTextDisplayEl = document.getElementById('customTextDisplay');
@@ -47,6 +48,8 @@ const sign2ImgEl = document.getElementById('signPreview2');
 const elementSelect = document.getElementById('elementSelect');
 const fontSizeInput = document.getElementById('fontSize');
 const fontSizeValue = document.getElementById('fontSizeValue');
+const fontStyleInput = document.getElementById('fontStyle');
+const boldToggleBtn = document.getElementById('boldToggleBtn');
 const textColorInput = document.getElementById('textColor');
 const posXInput = document.getElementById('posX');
 const posYInput = document.getElementById('posY');
@@ -58,6 +61,98 @@ const step2Status = document.getElementById('step2Status');
 const step3Status = document.getElementById('step3Status');
 const step5Status = document.getElementById('step5Status');
 const generateHint = document.getElementById('generateHint');
+
+// Width control elements
+const elementWidth = document.getElementById('elementWidth');
+const elementWidthValue = document.getElementById('elementWidthValue');
+
+// Sidebar controls
+const controlsSidebar = document.getElementById('controlsSidebar');
+const minimizePreviewBtn = document.getElementById('minimizePreviewBtn');
+
+// =====================
+// Sidebar Toggle Functionality
+// =====================
+minimizePreviewBtn.addEventListener('click', () => {
+  const isMinimized = controlsSidebar.classList.contains('minimized');
+  
+  if (isMinimized) {
+    // Open sidebar
+    controlsSidebar.classList.remove('minimized');
+    // Change arrow to point left (hide)
+    minimizePreviewBtn.innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+    `;
+    localStorage.setItem('sidebarMinimized', 'false');
+  } else {
+    // Close sidebar
+    controlsSidebar.classList.add('minimized');
+    // Change arrow to point right (open)
+    minimizePreviewBtn.innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 5l7 7m0 0l-7 7m7-7H2"></path>
+      </svg>
+    `;
+    localStorage.setItem('sidebarMinimized', 'true');
+  }
+});
+
+// Restore sidebar state on load
+if (localStorage.getItem('sidebarMinimized') === 'true') {
+  controlsSidebar.classList.add('minimized');
+  // Set arrow to point right
+  minimizePreviewBtn.innerHTML = `
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M13 5l7 7m0 0l-7 7m7-7H2"></path>
+    </svg>
+  `;
+} else {
+  // Set arrow to point left
+  minimizePreviewBtn.innerHTML = `
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M11 19l-7-7m0 0l7-7m-7 7h18"></path>
+    </svg>
+  `;
+}
+
+// =====================
+// Image Size Controls
+// =====================
+const logoSizeInput = document.getElementById('logoSize');
+const logoSizeValue = document.getElementById('logoSizeValue');
+const sign1SizeInput = document.getElementById('sign1Size');
+const sign1SizeValue = document.getElementById('sign1SizeValue');
+const sign2SizeInput = document.getElementById('sign2Size');
+const sign2SizeValue = document.getElementById('sign2SizeValue');
+
+logoSizeInput.addEventListener('input', (e) => {
+  const size = parseInt(e.target.value);
+  imageSizes.logo = size;
+  logoSizeValue.textContent = size;
+  const logoEl = document.getElementById('logoImg');
+  logoEl.style.transform = `scale(${size / 100})`;
+  logoEl.style.transformOrigin = 'top right';
+});
+
+sign1SizeInput.addEventListener('input', (e) => {
+  const size = parseInt(e.target.value);
+  imageSizes.sign1 = size;
+  sign1SizeValue.textContent = size;
+  const signEl = document.getElementById('signImg');
+  signEl.style.transform = `scale(${size / 100})`;
+  signEl.style.transformOrigin = 'bottom left';
+});
+
+sign2SizeInput.addEventListener('input', (e) => {
+  const size = parseInt(e.target.value);
+  imageSizes.sign2 = size;
+  sign2SizeValue.textContent = size;
+  const signEl = document.getElementById('signImg2');
+  signEl.style.transform = `scale(${size / 100})`;
+  signEl.style.transformOrigin = 'bottom right';
+});
 
 // =====================
 // Step Status Update
@@ -101,7 +196,9 @@ function handleCSVUpload(e) {
   const reader = new FileReader();
   reader.onload = (event) => {
     try {
-      csvData = parseCSV(event.target.result);
+      const result = parseCSV(event.target.result);
+      csvData = result.data;
+      const headers = result.headers;
 
       if (csvData.length === 0) {
         throw new Error('CSV is empty or invalid');
@@ -111,6 +208,9 @@ function handleCSVUpload(e) {
       csvStatus.className = 'status';
       recordsBadge.textContent = `${csvData.length} records`;
 
+      // Update placeholders dynamically
+      updatePlaceholders(headers);
+      
       updatePreview(csvData[0]);
       generateBtn.disabled = false;
       updateStepStatus();
@@ -126,29 +226,112 @@ function handleCSVUpload(e) {
 
 function parseCSV(csv) {
   const lines = csv.trim().split('\n');
-  if (lines.length < 2) return [];
+  if (lines.length < 2) return { data: [], headers: [] };
 
   const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
   const nameIdx = headers.indexOf('name');
   const courseIdx = headers.indexOf('course');
   const periodIdx = headers.indexOf('period');
   const collegeIdx = headers.indexOf('college');
+  const conductedByIdx = headers.indexOf('conducted_by');
+  const durationIdx = headers.indexOf('duration');
 
   if (nameIdx === -1 || courseIdx === -1 || periodIdx === -1 || collegeIdx === -1) {
     throw new Error('CSV must contain name, course, period, and college columns');
   }
 
-  return lines.slice(1).map(row => {
+  const data = lines.slice(1).map(row => {
     const cols = row.split(',').map(c => c.trim());
     return {
       name: cols[nameIdx] || '',
       course: cols[courseIdx] || '',
       period: cols[periodIdx] || '',
-      college: cols[collegeIdx] || ''
+      college: cols[collegeIdx] || '',
+      conducted_by: cols[conductedByIdx] || '',
+      duration: cols[durationIdx] || ''
     };
+  });
+
+  return { data, headers };
+}
+
+// =====================
+// Update Dynamic Placeholders
+// =====================
+function updatePlaceholders(headers) {
+  const placeholderList = document.querySelector('.placeholder-list');
+  
+  // Clear existing placeholders
+  placeholderList.innerHTML = '';
+  
+  // Create new placeholders for each header
+  headers.forEach(header => {
+    const placeholderSpan = document.createElement('span');
+    placeholderSpan.className = 'placeholder';
+    placeholderSpan.textContent = `{${header}}`;
+    placeholderSpan.style.cursor = 'pointer';
+    
+    // Add click event listener
+    placeholderSpan.addEventListener('click', () => {
+      insertPlaceholder(`{${header}}`);
+    });
+    
+    placeholderList.appendChild(placeholderSpan);
   });
 }
 
+// =====================
+// Insert Placeholder into Textarea
+// =====================
+function insertPlaceholder(placeholderText) {
+  const textarea = document.getElementById('customText');
+  
+  // Get current cursor position
+  const startPos = textarea.selectionStart;
+  const endPos = textarea.selectionEnd;
+  const textBefore = textarea.value.substring(0, startPos);
+  const textAfter = textarea.value.substring(endPos, textarea.value.length);
+  
+  // Add space before placeholder if text exists and doesn't end with space
+  const spaceBefore = textBefore.length > 0 && !textBefore.endsWith(' ') ? ' ' : '';
+  // Add space after placeholder
+  const spaceAfter = ' ';
+  
+  // Insert placeholder
+  textarea.value = textBefore + spaceBefore + placeholderText + spaceAfter + textAfter;
+  
+  // Move cursor after the inserted text
+  const newCursorPos = startPos + spaceBefore.length + placeholderText.length + spaceAfter.length;
+  textarea.selectionStart = newCursorPos;
+  textarea.selectionEnd = newCursorPos;
+  
+  // Focus on textarea
+  textarea.focus();
+  
+  // Trigger input event to update preview
+  textarea.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+// =====================
+// Template Variable Replacement
+// =====================
+function replaceTemplateVariables(template, record) {
+  if (!template) return '';
+  
+  let result = template;
+  
+  // Replace all placeholders dynamically from record object
+  // Make all fields bold except period
+  for (const [key, value] of Object.entries(record)) {
+    const placeholder = `{${key}}`;
+    const isBold = key !== 'period'; // Don't bold period
+    const replacementValue = isBold ? `<strong>${value || ''}</strong>` : (value || '');
+    
+    result = result.replace(new RegExp(placeholder, 'gi'), replacementValue);
+  }
+  
+  return result;
+}
 
 // =====================
 // Logo Upload
@@ -204,12 +387,9 @@ sign2FileInput.addEventListener('change', e => {
 // =====================
 function updatePreview(record) {
   studentNameEl.textContent = record.name || 'Student Name';
-  courseNameEl.textContent = record.course || 'Course Name';
-  collegeNameEl.textContent = record.college || 'College Name';
-  periodTextEl.textContent = record.period ? `Period: ${record.period}` : 'Period: dd/mm/yyyy - dd/mm/yyyy';
   
-  // update custom text display from textarea
-  customTextDisplayEl.textContent = customTextEl.value;
+  // update custom text display from textarea - with template replacement
+  customTextDisplayEl.innerHTML = replaceTemplateVariables(customTextEl.value, record);
   
   // Apply stored positions to all elements
   applyStoredPositions();
@@ -225,6 +405,12 @@ function applyStoredPositions() {
       const config = templateConfig[elementId];
       if (config.posX) el.style.left = config.posX + 'px';
       if (config.posY) el.style.top = config.posY + 'px';
+      if (config.width) {
+        el.style.maxWidth = config.width + 'px';
+        el.style.width = '100%';
+      }
+      if (config.fontFamily) el.style.fontFamily = config.fontFamily;
+      if (config.bold) el.style.fontWeight = '700';
     }
   });
 }
@@ -246,7 +432,11 @@ document.querySelectorAll('input[name="certMode"]').forEach(r => {
 
 // update preview when custom text changes
 customTextEl.addEventListener('input', (e) => {
-  customTextDisplayEl.textContent = e.target.value;
+  if (csvData.length > 0) {
+    customTextDisplayEl.innerHTML = replaceTemplateVariables(e.target.value, csvData[0]);
+  } else {
+    customTextDisplayEl.innerHTML = e.target.value;
+  }
 });
 
 
@@ -369,8 +559,7 @@ function initTemplateEditor() {
     // font size change
     fontSizeInput.addEventListener('input', (e) => {
       if (!selectedElement) return;
-      const size = parseInt(e.target.value);
-      fontSizeValue.textContent = size + 'px';
+      const size = parseInt(e.target.value) || 14;
       
       templateConfig[selectedElement].fontSize = size;
       const el = document.getElementById(selectedElement);
@@ -407,15 +596,62 @@ function initTemplateEditor() {
       el.style.marginTop = posY + 'px';
     });
 
+    // font style change
+    fontStyleInput.addEventListener('change', (e) => {
+      if (!selectedElement) return;
+      const fontFamily = e.target.value;
+      
+      templateConfig[selectedElement].fontFamily = fontFamily;
+      const el = document.getElementById(selectedElement);
+      el.style.fontFamily = fontFamily;
+    });
+
+    // width change
+    elementWidth.addEventListener('input', (e) => {
+      if (!selectedElement) return;
+      const width = parseInt(e.target.value) || 400;
+      
+      templateConfig[selectedElement].width = width;
+      const el = document.getElementById(selectedElement);
+      el.style.maxWidth = width + 'px';
+      el.style.width = '100%';
+    });
+
+    // bold toggle for student name
+    boldToggleBtn.addEventListener('click', () => {
+      if (!selectedElement) return;
+      
+      // Only allow bold toggle for student name
+      if (selectedElement !== 'studentName') {
+        alert('Bold control is only available for the student name');
+        return;
+      }
+      
+      const isBold = templateConfig[selectedElement].bold;
+      templateConfig[selectedElement].bold = !isBold;
+      
+      // Update button state
+      if (!isBold) {
+        boldToggleBtn.classList.remove('btn-toggle-off');
+        boldToggleBtn.classList.add('btn-toggle-on');
+        boldToggleBtn.textContent = 'ON';
+      } else {
+        boldToggleBtn.classList.remove('btn-toggle-on');
+        boldToggleBtn.classList.add('btn-toggle-off');
+        boldToggleBtn.textContent = 'OFF';
+      }
+      
+      // Apply to element
+      const el = document.getElementById(selectedElement);
+      el.style.fontWeight = !isBold ? '700' : '400';
+    });
+
     // reset to default
     resetTemplateBtn.addEventListener('click', () => {
       if (confirm('Reset all template settings to default?')) {
         templateConfig = {
-          studentName: { fontSize: 48, color: '#1a1a1a', posX: 0, posY: 0 },
-          courseName: { fontSize: 28, color: '#333333', posX: 0, posY: 0 },
-          collegeName: { fontSize: 18, color: '#333333', posX: 0, posY: 0 },
-          customTextDisplay: { fontSize: 14, color: '#333333', posX: 0, posY: 0 },
-          periodText: { fontSize: 14, color: '#333333', posX: 0, posY: 0 }
+          studentName: { fontSize: 48, color: '#1a1a1a', posX: 0, posY: 0, width: 600, fontFamily: 'Poppins', bold: false },
+          customTextDisplay: { fontSize: 14, color: '#333333', posX: 0, posY: 0, width: 800, fontFamily: 'Poppins', bold: false }
         };
         
         // apply defaults to all elements
@@ -456,12 +692,37 @@ function selectElement(elementId) {
     el.style.outline = '2px dashed #38bdf8';
 
     // load config into inputs
-    const config = templateConfig[elementId] || { fontSize: 14, color: '#1e293b', posX: 0, posY: 0 };
+    const config = templateConfig[elementId] || { fontSize: 14, color: '#1e293b', posX: 0, posY: 0, width: 400, fontFamily: 'Poppins', bold: false };
     if (fontSizeInput) fontSizeInput.value = config.fontSize;
     if (fontSizeValue) fontSizeValue.textContent = config.fontSize + 'px';
+    if (fontStyleInput) fontStyleInput.value = config.fontFamily || 'Poppins';
     if (textColorInput) textColorInput.value = config.color;
     if (posXInput) posXInput.value = config.posX;
     if (posYInput) posYInput.value = config.posY;
+    if (elementWidth) elementWidth.value = config.width || 400;
+    if (elementWidthValue) elementWidthValue.textContent = (config.width || 400) + 'px';
+    
+    // handle bold button
+    if (boldToggleBtn) {
+      if (elementId === 'studentName') {
+        boldToggleBtn.disabled = false;
+        const isBold = config.bold || false;
+        if (isBold) {
+          boldToggleBtn.classList.remove('btn-toggle-off');
+          boldToggleBtn.classList.add('btn-toggle-on');
+          boldToggleBtn.textContent = 'ON';
+        } else {
+          boldToggleBtn.classList.remove('btn-toggle-on');
+          boldToggleBtn.classList.add('btn-toggle-off');
+          boldToggleBtn.textContent = 'OFF';
+        }
+      } else {
+        boldToggleBtn.disabled = true;
+        boldToggleBtn.classList.remove('btn-toggle-on');
+        boldToggleBtn.classList.add('btn-toggle-off');
+        boldToggleBtn.textContent = 'OFF';
+      }
+    }
   }
 }
 

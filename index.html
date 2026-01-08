@@ -27,10 +27,10 @@
   <!-- HEADER -->
   <header class="app-header">
     <div class="brand">
-      <div class="brand-logo" title="Certificate Generator">🎓</div>
+      <div class="brand-logo" title="Certificate Generator">C</div>
       <div class="brand-text">
         <h1>Certificate Generator</h1>
-        <p>✨ Bulk & Automatic Certificates</p>
+        <p>Professional Bulk Certificate Creation</p>
       </div>
     </div>
     <div class="progress-indicator">
@@ -45,6 +45,8 @@
   </header>
 
   <main class="app-main">
+    <div class="main-container">
+      <div class="controls-sidebar" id="controlsSidebar">
 
     <!-- STEP 1 : DATA -->
     <section class="panel step-panel" data-step="1">
@@ -57,9 +59,10 @@
         <label>Student Data (CSV) <span class="required">*</span></label>
         <div class="file-input">
           <input type="file" id="dataFile" accept=".csv" />
-          <span class="file-input-hint">📎 Click to select CSV file</span>
+          <span class="file-input-hint">Select CSV file</span>
         </div>
         <p class="hint">Required columns: <strong>name</strong>, <strong>course</strong>, <strong>period</strong>, <strong>college</strong></p>
+        <p class="hint">Optional columns: <strong>conducted_by</strong>, <strong>duration</strong></p>
         <p id="csvStatus" class="status"></p>
       </div>
     </section>
@@ -75,40 +78,52 @@
 
         <!-- LOGO -->
         <div class="field">
-          <label>Logo <span class="tooltip-icon" title="Recommended: PNG, max 200x100px">ℹ️</span></label>
+          <label>Logo <span class="tooltip-icon" title="Recommended: PNG, max 200x100px">i</span></label>
           <div class="file-input">
             <input type="file" id="logoFile" accept="image/*" />
-            <span class="file-input-hint">📎 Click to select logo</span>
+            <span class="file-input-hint">Select logo file</span>
           </div>
           <div class="preview-box">
             <span class="preview-label">Logo Preview</span>
             <img id="logoPreview" class="preview-img" />
           </div>
+          <div class="size-control">
+            <label>Size: <span id="logoSizeValue">100</span>%</label>
+            <input type="range" id="logoSize" min="30" max="200" value="100" class="range-input">
+          </div>
         </div>
 
         <!-- SIGNATURE 1 -->
         <div class="field">
-          <label>Authorized Signature 1 <span class="tooltip-icon" title="PNG/JPG recommended, transparent background">ℹ️</span></label>
+          <label>Authorized Signature 1 <span class="tooltip-icon" title="PNG/JPG recommended, transparent background">i</span></label>
           <div class="file-input">
             <input type="file" id="signFile" accept="image/*" />
-            <span class="file-input-hint">📎 Click to select signature</span>
+            <span class="file-input-hint">Select signature file</span>
           </div>
           <div class="preview-box">
             <span class="preview-label">Signature 1 Preview</span>
             <img id="signPreview" class="preview-img" />
           </div>
+          <div class="size-control">
+            <label>Size: <span id="sign1SizeValue">100</span>%</label>
+            <input type="range" id="sign1Size" min="30" max="200" value="100" class="range-input">
+          </div>
         </div>
 
         <!-- SIGNATURE 2 -->
         <div class="field">
-          <label>Authorized Signature 2 <span class="tooltip-icon" title="Optional second signature">ℹ️</span></label>
+          <label>Authorized Signature 2 <span class="tooltip-icon" title="Optional second signature">i</span></label>
           <div class="file-input">
             <input type="file" id="signFile2" accept="image/*" />
-            <span class="file-input-hint">📎 Click to select signature</span>
+            <span class="file-input-hint">Select signature file</span>
           </div>
           <div class="preview-box">
             <span class="preview-label">Signature 2 Preview</span>
             <img id="signPreview2" class="preview-img" />
+          </div>
+          <div class="size-control">
+            <label>Size: <span id="sign2SizeValue">100</span>%</label>
+            <input type="range" id="sign2Size" min="30" max="200" value="100" class="range-input">
           </div>
         </div>
 
@@ -123,8 +138,14 @@
       </div>
       <div class="field">
         <label>Add Custom Text (Optional) <span class="tooltip-icon" title="Additional text to display on certificate">ℹ️</span></label>
-        <textarea id="customText" placeholder="E.g., 'Awarded for outstanding performance' or 'Valid from Jan 2026 to Dec 2026'" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:rgba(15,23,42,0.9);color:var(--text);font-family:inherit;font-size:13px;min-height:80px;resize:vertical;"></textarea>
-        <p class="hint">📝 This text will appear on all generated certificates</p>
+        <textarea id="customText" placeholder="E.g., 'from {college} has completed the Certification Program on {course} conducted by {conducted_by} from {duration}'" class="textarea-input"></textarea>
+        <p class="hint">This text will appear on all generated certificates</p>
+        <div class="template-help">
+          <p><strong>Available Placeholders:</strong></p>
+          <div class="placeholder-list">
+            <span class="placeholder-empty">Upload CSV to get placeholders</span>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -134,38 +155,53 @@
         <h2 class="panel-title">Step 3b · Customize Template</h2>
         <span class="step-status" id="step3bStatus">✓ Optional</span>
       </div>
-      <p class="hint">👆 Click certificate elements below to customize their appearance, or select from dropdown</p>
+      <p class="hint">Click certificate elements below to customize their appearance, or select from dropdown</p>
       <div class="grid-2">
         <div class="field">
           <label>Selected Element</label>
-          <select id="elementSelect" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:rgba(15,23,42,0.9);color:var(--text);">
+          <select id="elementSelect" class="select-input">
             <option value="">Click element in preview</option>
             <option value="studentName">Student Name</option>
-            <option value="courseName">Course Name</option>
-            <option value="collegeName">College Name</option>
             <option value="customTextDisplay">Custom Text</option>
-            <option value="periodText">Period</option>
           </select>
         </div>
         <div class="field">
           <label>Font Size</label>
-          <input type="range" id="fontSize" min="10" max="60" value="24" style="width:100%;">
-          <span id="fontSizeValue" style="font-size:12px;color:var(--muted);">24px</span>
+          <input type="number" id="fontSize" min="10" max="60" value="24" class="number-input" placeholder="px">
+        </div>
+        <div class="field">
+          <label>Font Style</label>
+          <select id="fontStyle" class="select-input">
+            <option value="Arial">Arial</option>
+            <option value="Georgia">Georgia</option>
+            <option value="'Times New Roman'">Times New Roman</option>
+            <option value="Verdana">Verdana</option>
+            <option value="'Courier New'">Courier New</option>
+            <option value="Poppins" selected>Poppins</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Bold (Name Only)</label>
+          <button id="boldToggleBtn" type="button" class="btn-toggle-off">OFF</button>
         </div>
         <div class="field">
           <label>Text Color</label>
-          <input type="color" id="textColor" value="#1e293b" style="width:100%;height:40px;border:none;border-radius:6px;cursor:pointer;">
+          <input type="color" id="textColor" value="#1e293b" class="color-input">
         </div>
         <div class="field">
           <label>X Position</label>
-          <input type="number" id="posX" min="0" value="0" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:rgba(15,23,42,0.9);color:var(--text);">
+          <input type="number" id="posX" min="0" value="0" class="number-input">
         </div>
         <div class="field">
           <label>Y Position</label>
-          <input type="number" id="posY" min="0" value="0" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:rgba(15,23,42,0.9);color:var(--text);">
+          <input type="number" id="posY" min="0" value="0" class="number-input">
         </div>
         <div class="field">
-          <button id="resetTemplateBtn" type="button" style="width:100%;background:rgba(149,21,21,0.8);">Reset to Default</button>
+          <label>Width (px)</label>
+          <input type="number" id="elementWidth" min="50" max="800" value="400" class="number-input" placeholder="px">
+        </div>
+        <div class="field">
+          <button id="resetTemplateBtn" type="button" class="btn-reset">Reset to Default</button>
         </div>
       </div>
     </section>
@@ -179,21 +215,35 @@
       <div class="field">
         <label>Certificate Mode <span class="tooltip-icon" title="Choose certificate type">ℹ️</span></label>
         <div class="mode-selector">
-          <label class="mode-option"><input type="radio" name="certMode" value="completed" checked> <span>🎓 Course Completed</span></label>
-          <label class="mode-option"><input type="radio" name="certMode" value="participation"> <span>👏 Participation</span></label>
+          <label class="mode-option"><input type="radio" name="certMode" value="completed" checked> <span>Course Completed</span></label>
+          <label class="mode-option"><input type="radio" name="certMode" value="participation"> <span>Participation</span></label>
         </div>
       </div>
 
       <div class="actions">
         <button id="generateBtn" type="button" disabled class="btn-primary">
-          <span class="btn-icon">⚡</span> Generate All Certificates
+          Generate All Certificates
         </button>
         <span id="recordsBadge" class="badge">0 records</span>
       </div>
-      <p class="hint" id="generateHint" style="display:none;">🎉 All steps complete! Click above to generate certificates.</p>
+      <p class="hint" id="generateHint" style="display:none;">All steps complete! Click above to generate certificates.</p>
     </section>
 
     <!-- CERTIFICATE PREVIEW -->
+    </div>
+
+    <button id="expandBtn" class="sidebar-expand-btn" title="Show controls" style="display: none;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 5l7 7m0 0l-7 7m7-7H2"></path>
+      </svg>
+    </button>
+
+      <div class="preview-container" id="previewContainer">
+        <button id="minimizePreviewBtn" class="preview-minimize-btn" title="Hide sidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+        </button>
     <section id="certificate-wrapper">
       <div id="certificate">
         <!-- Background Template Image -->
@@ -210,13 +260,11 @@
         <div class="certificate-body">
           <h1 id="studentName" class="cert-element" data-element="studentName">Student Name</h1>
           <p id="customTextDisplay" class="cert-element" data-element="customTextDisplay"></p>
-          <h3 id="courseName" class="cert-element" data-element="courseName">Course Name</h3>
-          <p id="collegeName" class="cert-element" data-element="collegeName">College Name</p>
-          <p id="periodText" class="cert-element period-text" data-element="periodText">Period: dd/mm/yyyy - dd/mm/yyyy</p>
         </div>
       </div>
     </section>
-
+      </div>
+    </div>
   </main>
 
   <!-- FOOTER -->
