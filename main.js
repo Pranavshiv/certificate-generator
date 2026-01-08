@@ -210,6 +210,23 @@ function updatePreview(record) {
   
   // update custom text display from textarea
   customTextDisplayEl.textContent = customTextEl.value;
+  
+  // Apply stored positions to all elements
+  applyStoredPositions();
+  
+  // Make elements draggable
+  makeDraggable();
+}
+
+function applyStoredPositions() {
+  Object.keys(templateConfig).forEach(elementId => {
+    const el = document.getElementById(elementId);
+    if (el && templateConfig[elementId]) {
+      const config = templateConfig[elementId];
+      if (config.posX) el.style.left = config.posX + 'px';
+      if (config.posY) el.style.top = config.posY + 'px';
+    }
+  });
 }
 
 // Track custom text input
@@ -246,47 +263,81 @@ generateBtn.addEventListener('click', async (e) => {
   }
 
   generateBtn.disabled = true;
-  generateBtn.textContent = 'Generating...';
+  generateBtn.textContent = 'Generating certificates...';
 
   let success = 0;
+  const zip = new JSZip();
+  const mode = (document.querySelector('input[name="certMode"]:checked') || { value: 'completed' }).value;
+  const folderName = `Certificates_${mode}_${new Date().getTime()}`;
+  const folder = zip.folder(folderName);
 
-  for (let i = 0; i < csvData.length; i++) {
-    try {
-      updatePreview(csvData[i]);
-      await new Promise(r => setTimeout(r, 100));
+  try {
+    for (let i = 0; i < csvData.length; i++) {
+      try {
+        updatePreview(csvData[i]);
+        await new Promise(r => setTimeout(r, 100));
 
-      const cert = document.getElementById('certificate');
-      const canvas = await html2canvas(cert, {
-        scale: 2,
-        backgroundColor: '#ffffff'
-      });
+        generateBtn.textContent = `Generating (${i + 1}/${csvData.length})...`;
 
-      const imageData = canvas.toDataURL('image/png');
+        const cert = document.getElementById('certificate');
+        const canvas = await html2canvas(cert, {
+          scale: 2,
+          backgroundColor: '#ffffff'
+        });
+
+        // Convert canvas to image data
+        const imgData = canvas.toDataURL('image/png');
+        
+        // Create PDF from image
+        const jsPDFConstructor = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
+        const pdf = new jsPDFConstructor({
+          orientation: 'landscape',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        const imgWidth = 297; // A4 landscape width in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        
+        // Get PDF as blob and add to zip
+        const pdfBlob = pdf.output('blob');
+        const fileName = `Certificate_${csvData[i].name.replace(/\s+/g, '_')}_${mode}.pdf`;
+        folder.file(fileName, pdfBlob);
+
+        success++;
+      } catch (err) {
+        console.error('Certificate generation error:', err);
+      }
+    }
+
+    // Generate and download ZIP
+    if (success > 0) {
+      generateBtn.textContent = 'Creating ZIP file...';
+      await new Promise(r => setTimeout(r, 200));
       
-      // Use fetch + blob for more reliable downloads
-      const response = await fetch(imageData);
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(zipBlob);
       
       const link = document.createElement('a');
       link.href = url;
-      const mode = (document.querySelector('input[name="certMode"]:checked') || { value: 'completed' }).value;
-      link.download = `Certificate_${csvData[i].name.replace(/\s+/g, '_')}_${mode}.png`;
+      link.download = `Certificates_${mode}_${new Date().toISOString().split('T')[0]}.zip`;
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-
-      success++;
-    } catch (err) {
-      console.error('Generation error:', err);
+      
+      alert(`✅ Successfully generated ${success}/${csvData.length} certificates and downloaded as ZIP`);
     }
+  } catch (err) {
+    console.error('ZIP generation error:', err);
+    alert('❌ Error generating certificates: ' + err.message);
   }
 
-  alert(`✅ Generated ${success}/${csvData.length} certificates`);
   generateBtn.disabled = false;
-  generateBtn.textContent = 'Generate all certificates';
+  generateBtn.textContent = '⚡ Generate All Certificates';
 });
 
 // =====================
@@ -414,11 +465,96 @@ function selectElement(elementId) {
   }
 }
 
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initTemplateEditor);
-} else {
-  initTemplateEditor();
+// =====================
+// Draggable & Resizable Elements
+// =====================
+let draggedElement = null;
+let offsetX = 0;
+let offsetY = 0;
+let startX = 0;
+let startY = 0;
+
+function makeDraggable() {
+  const certElements = document.querySelectorAll('.cert-element, .cert-logo, .cert-signature');
+  const certificate = document.getElementById('certificate');
+  
+  certElements.forEach(element => {
+    // Only add listeners once
+    if (element.dataset.draggable === 'true') return;
+    element.dataset.draggable = 'true';
+    
+    element.style.position = 'absolute';
+    
+    element.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return; // Only left mouse button
+      
+      draggedElement = element;
+      const rect = element.getBoundingClientRect();
+      const certRect = certificate.getBoundingClientRect();
+      
+      startX = e.clientX;
+      startY = e.clientY;
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      
+      element.style.opacity = '0.7';
+      element.style.zIndex = '999';
+      e.preventDefault();
+    });
+  });
+  
+  document.addEventListener('mousemove', (e) => {
+    if (!draggedElement) return;
+    
+    const certificate = document.getElementById('certificate');
+    const certRect = certificate.getBoundingClientRect();
+    
+    let x = e.clientX - certRect.left - offsetX;
+    let y = e.clientY - certRect.top - offsetY;
+    
+    // Clamp position within certificate bounds
+    x = Math.max(0, Math.min(x, certRect.width - draggedElement.offsetWidth));
+    y = Math.max(0, Math.min(y, certRect.height - draggedElement.offsetHeight));
+    
+    draggedElement.style.left = x + 'px';
+    draggedElement.style.top = y + 'px';
+  });
+  
+  document.addEventListener('mouseup', (e) => {
+    if (!draggedElement) return;
+    
+    draggedElement.style.opacity = '1';
+    draggedElement.style.zIndex = '3';
+    
+    // Store position in templateConfig
+    const elementId = draggedElement.id;
+    const x = parseFloat(draggedElement.style.left) || 0;
+    const y = parseFloat(draggedElement.style.top) || 0;
+    
+    if (templateConfig[elementId]) {
+      templateConfig[elementId].posX = x;
+      templateConfig[elementId].posY = y;
+    }
+    
+    draggedElement = null;
+  });
 }
 
-console.log('✅ main.js loaded with template editor');
+
+// Make elements draggable when certificate is loaded
+function initDraggable() {
+  setTimeout(makeDraggable, 100);
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initTemplateEditor();
+    initDraggable();
+  });
+} else {
+  initTemplateEditor();
+  initDraggable();
+}
+
+console.log('✅ main.js loaded with draggable elements and template editor');

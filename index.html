@@ -13,6 +13,12 @@
 
   <!-- html2canvas -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  
+  <!-- jsPDF for PDF generation -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  
+  <!-- JSZip for ZIP file creation -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
 <body>
 
@@ -192,6 +198,13 @@
       <div id="certificate">
         <!-- Background Template Image -->
         <img id="backgroundTemplate" class="cert-background" src="certificate_template.png" alt="Certificate Template" />
+
+        <!-- Logo -->
+        <img id="logoImg" class="cert-logo" alt="Logo" />
+
+        <!-- Signatures -->
+        <img id="signImg" class="cert-signature cert-signature-1" alt="Signature 1" />
+        <img id="signImg2" class="cert-signature cert-signature-2" alt="Signature 2" />
 
         <!-- Text Overlay -->
         <div class="certificate-body">
