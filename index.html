@@ -91,6 +91,43 @@
             <label>Size: <span id="logoSizeValue">100</span>%</label>
             <input type="range" id="logoSize" min="30" max="200" value="100" class="range-input">
           </div>
+          <div class="grid-2">
+            <div class="field">
+              <label>Logo X Position (px)</label>
+              <input type="number" id="logoPositionX" value="0" class="number-input" placeholder="X position">
+            </div>
+            <div class="field">
+              <label>Logo Y Position (px)</label>
+              <input type="number" id="logoPositionY" value="0" class="number-input" placeholder="Y position">
+            </div>
+          </div>
+        </div>
+
+        <!-- LOGO 2 -->
+        <div class="field">
+          <label>Logo 2 (Optional) <span class="tooltip-icon" title="Recommended: PNG, max 200x100px">i</span></label>
+          <div class="file-input">
+            <input type="file" id="logoFile2" accept="image/*" />
+            <span class="file-input-hint">Select logo file</span>
+          </div>
+          <div class="preview-box">
+            <span class="preview-label">Logo 2 Preview</span>
+            <img id="logoPreview2" class="preview-img" />
+          </div>
+          <div class="size-control">
+            <label>Size: <span id="logo2SizeValue">100</span>%</label>
+            <input type="range" id="logo2Size" min="30" max="200" value="100" class="range-input">
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label>Logo 2 X Position (px)</label>
+              <input type="number" id="logo2PositionX" value="0" class="number-input" placeholder="X position">
+            </div>
+            <div class="field">
+              <label>Logo 2 Y Position (px)</label>
+              <input type="number" id="logo2PositionY" value="0" class="number-input" placeholder="Y position">
+            </div>
+          </div>
         </div>
 
         <!-- SIGNATURE 1 -->
@@ -108,6 +145,10 @@
             <label>Size: <span id="sign1SizeValue">100</span>%</label>
             <input type="range" id="sign1Size" min="30" max="200" value="100" class="range-input">
           </div>
+          <div class="field">
+            <label>Signature 1 Position/Title</label>
+            <input type="text" id="sign1Position" class="text-input" placeholder="e.g., Director, Principal, or Coordinator">
+          </div>
         </div>
 
         <!-- SIGNATURE 2 -->
@@ -124,6 +165,10 @@
           <div class="size-control">
             <label>Size: <span id="sign2SizeValue">100</span>%</label>
             <input type="range" id="sign2Size" min="30" max="200" value="100" class="range-input">
+          </div>
+          <div class="field">
+            <label>Signature 2 Position/Title</label>
+            <input type="text" id="sign2Position" class="text-input" placeholder="e.g., Manager, Dean, or Coordinator">
           </div>
         </div>
 
@@ -252,9 +297,16 @@
         <!-- Logo -->
         <img id="logoImg" class="cert-logo" alt="Logo" />
 
+        <!-- Logo 2 -->
+        <img id="logoImg2" class="cert-logo cert-logo-2" alt="Logo 2" />
+
         <!-- Signatures -->
         <img id="signImg" class="cert-signature cert-signature-1" alt="Signature 1" />
         <img id="signImg2" class="cert-signature cert-signature-2" alt="Signature 2" />
+
+        <!-- Signature Positions/Titles -->
+        <p id="sign1PositionDisplay" class="cert-signature-position cert-signature-position-1"></p>
+        <p id="sign2PositionDisplay" class="cert-signature-position cert-signature-position-2"></p>
 
         <!-- Text Overlay -->
         <div class="certificate-body">

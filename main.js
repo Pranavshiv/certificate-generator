@@ -3,6 +3,7 @@
 // =====================
 let csvData = [];
 let logoImg = null;
+let logo2Img = null;
 let sign1ImgData = null;
 let sign2ImgData = null;
 let logoUploaded = false;
@@ -11,6 +12,7 @@ let customTextAdded = false;
 // Image sizes (in percentage)
 let imageSizes = {
   logo: 100,
+  logo2: 100,
   sign1: 100,
   sign2: 100
 };
@@ -28,6 +30,7 @@ let selectedElement = null;
 // =====================
 const dataFileInput = document.getElementById('dataFile');
 const logoFileInput = document.getElementById('logoFile');
+const logo2FileInput = document.getElementById('logoFile2');
 const sign1FileInput = document.getElementById('signFile');
 const sign2FileInput = document.getElementById('signFile2');
 
@@ -41,8 +44,19 @@ const customTextEl = document.getElementById('customText');
 const customTextDisplayEl = document.getElementById('customTextDisplay');
 
 const logoImgEl = document.getElementById('logoPreview');
+const logo2ImgEl = document.getElementById('logoPreview2');
 const sign1ImgEl = document.getElementById('signPreview');
 const sign2ImgEl = document.getElementById('signPreview2');
+
+// Logo position controls
+const logoPositionXInput = document.getElementById('logoPositionX');
+const logoPositionYInput = document.getElementById('logoPositionY');
+const logo2PositionXInput = document.getElementById('logo2PositionX');
+const logo2PositionYInput = document.getElementById('logo2PositionY');
+
+// Signature position/title inputs
+const sign1PositionInput = document.getElementById('sign1Position');
+const sign2PositionInput = document.getElementById('sign2Position');
 
 // Template editor elements
 const elementSelect = document.getElementById('elementSelect');
@@ -122,6 +136,8 @@ if (localStorage.getItem('sidebarMinimized') === 'true') {
 // =====================
 const logoSizeInput = document.getElementById('logoSize');
 const logoSizeValue = document.getElementById('logoSizeValue');
+const logo2SizeInput = document.getElementById('logo2Size');
+const logo2SizeValue = document.getElementById('logo2SizeValue');
 const sign1SizeInput = document.getElementById('sign1Size');
 const sign1SizeValue = document.getElementById('sign1SizeValue');
 const sign2SizeInput = document.getElementById('sign2Size');
@@ -134,6 +150,15 @@ logoSizeInput.addEventListener('input', (e) => {
   const logoEl = document.getElementById('logoImg');
   logoEl.style.transform = `scale(${size / 100})`;
   logoEl.style.transformOrigin = 'top right';
+});
+
+logo2SizeInput.addEventListener('input', (e) => {
+  const size = parseInt(e.target.value);
+  imageSizes.logo2 = size;
+  logo2SizeValue.textContent = size;
+  const logoEl = document.getElementById('logoImg2');
+  logoEl.style.transform = `scale(${size / 100})`;
+  logoEl.style.transformOrigin = 'top left';
 });
 
 sign1SizeInput.addEventListener('input', (e) => {
@@ -152,6 +177,34 @@ sign2SizeInput.addEventListener('input', (e) => {
   const signEl = document.getElementById('signImg2');
   signEl.style.transform = `scale(${size / 100})`;
   signEl.style.transformOrigin = 'bottom right';
+});
+
+// =====================
+// Logo Position Controls
+// =====================
+logoPositionXInput.addEventListener('input', (e) => {
+  const logoEl = document.getElementById('logoImg');
+  const posX = parseInt(e.target.value) || 0;
+  logoEl.style.right = 'auto';
+  logoEl.style.left = posX + 'px';
+});
+
+logoPositionYInput.addEventListener('input', (e) => {
+  const logoEl = document.getElementById('logoImg');
+  const posY = parseInt(e.target.value) || 0;
+  logoEl.style.top = posY + 'px';
+});
+
+logo2PositionXInput.addEventListener('input', (e) => {
+  const logoEl = document.getElementById('logoImg2');
+  const posX = parseInt(e.target.value) || 0;
+  logoEl.style.left = posX + 'px';
+});
+
+logo2PositionYInput.addEventListener('input', (e) => {
+  const logoEl = document.getElementById('logoImg2');
+  const posY = parseInt(e.target.value) || 0;
+  logoEl.style.top = posY + 'px';
 });
 
 // =====================
@@ -351,6 +404,23 @@ logoFileInput.addEventListener('change', e => {
   reader.readAsDataURL(file);
 });
 
+// =====================
+// Logo 2 Upload
+// =====================
+logo2FileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = ev => {
+    logo2Img = ev.target.result;
+    logo2ImgEl.src = logo2Img;
+    document.getElementById('logoImg2').src = logo2Img;
+    updateStepStatus();
+  };
+  reader.readAsDataURL(file);
+});
+
 
 // =====================
 // Signature Uploads
@@ -380,6 +450,30 @@ sign2FileInput.addEventListener('change', e => {
   };
   reader.readAsDataURL(file);
 });
+
+// =====================
+// =====================
+// Signature Position/Title
+// =====================
+if (sign1PositionInput) {
+  sign1PositionInput.addEventListener('input', (e) => {
+    const sign1PosEl = document.getElementById('sign1PositionDisplay');
+    if (sign1PosEl) {
+      sign1PosEl.textContent = e.target.value;
+      console.log('Signature 1 position updated:', e.target.value);
+    }
+  });
+}
+
+if (sign2PositionInput) {
+  sign2PositionInput.addEventListener('input', (e) => {
+    const sign2PosEl = document.getElementById('sign2PositionDisplay');
+    if (sign2PosEl) {
+      sign2PosEl.textContent = e.target.value;
+      console.log('Signature 2 position updated:', e.target.value);
+    }
+  });
+}
 
 
 // =====================
@@ -736,7 +830,7 @@ let startX = 0;
 let startY = 0;
 
 function makeDraggable() {
-  const certElements = document.querySelectorAll('.cert-element, .cert-logo, .cert-signature');
+  const certElements = document.querySelectorAll('.cert-element, .cert-logo, .cert-signature, .cert-signature-position');
   const certificate = document.getElementById('certificate');
   
   certElements.forEach(element => {
