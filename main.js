@@ -8,6 +8,8 @@ let sign1ImgData = null;
 let sign2ImgData = null;
 let logoUploaded = false;
 let customTextAdded = false;
+let currentCertificateId = null;
+let currentQRCode = null;
 
 // Image sizes (in percentage)
 let imageSizes = {
@@ -22,7 +24,9 @@ let templateConfig = {
   studentName: { fontSize: 48, color: '#1a1a1a', posX: 0, posY: 0, width: 600, fontFamily: 'Poppins', bold: false },
   customTextDisplay: { fontSize: 14, color: '#333333', posX: 0, posY: 0, width: 800, fontFamily: 'Poppins', bold: false },
   sign1PositionDisplay: { fontSize: 13, color: '#333333', posX: 100, posY: 0, width: 200, fontFamily: 'Poppins', bold: false },
-  sign2PositionDisplay: { fontSize: 13, color: '#333333', posX: 100, posY: 0, width: 200, fontFamily: 'Poppins', bold: false }
+  sign2PositionDisplay: { fontSize: 13, color: '#333333', posX: 100, posY: 0, width: 200, fontFamily: 'Poppins', bold: false },
+  qrCodeDisplay: { fontSize: 14, color: '#1a1a1a', posX: 20, posY: 20, width: 120, fontFamily: 'Poppins', bold: false },
+  certificateIdDisplay: { fontSize: 12, color: '#555555', posX: 0, posY: 20, width: 200, fontFamily: 'Courier New', bold: false }
 };
 
 let selectedElement = null;
@@ -63,6 +67,10 @@ const sign2PositionInput = document.getElementById('sign2Position');
 // Signature position display elements (for certificate preview)
 const sign1PositionDisplay = document.getElementById('sign1PositionDisplay');
 const sign2PositionDisplay = document.getElementById('sign2PositionDisplay');
+
+// QR Code and Certificate ID elements
+const qrCodeDisplay = document.getElementById('qrCodeDisplay');
+const certificateIdDisplay = document.getElementById('certificateIdDisplay');
 
 // Template editor elements
 const elementSelect = document.getElementById('elementSelect');
@@ -174,6 +182,40 @@ function updateSignaturePositionDisplay(elementId) {
     displayEl.innerHTML = html;
   } else {
     displayEl.innerHTML = `<span style="opacity:0.3;">${elementId === 'sign1PositionDisplay' ? 'Signature 1 details...' : 'Signature 2 details...'}</span>`;
+  }
+}
+
+// Generate unique 8-digit Certificate ID
+function generateCertificateID() {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let id = '';
+  for (let i = 0; i < 8; i++) {
+    id += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return id;
+}
+
+// Generate QR Code Image URL (using QR Server API)
+function generateQRCodeUrl(data) {
+  const encodedData = encodeURIComponent(data);
+  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodedData}`;
+}
+
+// Update QR Code and Certificate ID on certificate
+function updateQRAndID() {
+  currentCertificateId = generateCertificateID();
+  
+  if (qrCodeDisplay) {
+    const verificationUrl = `./qr/view-certificate.php?id=${currentCertificateId}`;
+    qrCodeDisplay.src = generateQRCodeUrl(verificationUrl);
+    qrCodeDisplay.alt = `QR Code for ${currentCertificateId}`;
+  }
+  
+  if (certificateIdDisplay) {
+    const valueSpan = certificateIdDisplay.querySelector('.value');
+    if (valueSpan) {
+      valueSpan.textContent = currentCertificateId;
+    }
   }
 }
 
@@ -529,7 +571,7 @@ function updateSignaturePositionDisplay(id, value) {
   const el = document.getElementById(id);
   if (el) {
     // If value is empty or only whitespace, show a placeholder to keep box visible
-    const safeValue = value.replace(/\n/g, '<br>');
+    const safeValue = (value || '').replace(/\n/g, '<br>');
     if (safeValue.replace(/<br>/g, '').trim() === '') {
       el.innerHTML = `<span style="opacity:0.3;">${id === 'sign1PositionDisplay' ? 'Signature 1 details...' : 'Signature 2 details...'}</span>`;
     } else {
@@ -555,14 +597,14 @@ function updateSignaturePositionDisplay(id, value) {
 if (sign1PositionInput) {
   sign1PositionInput.addEventListener('input', (e) => {
     updateSignaturePositionDisplay('sign1PositionDisplay', e.target.value);
-    console.log('Signature 1 position updated:', e.target.value);
+    // console.log('Signature 1 position updated:', e.target.value);
   });
 }
 
 if (sign2PositionInput) {
   sign2PositionInput.addEventListener('input', (e) => {
     updateSignaturePositionDisplay('sign2PositionDisplay', e.target.value);
-    console.log('Signature 2 position updated:', e.target.value);
+    // console.log('Signature 2 position updated:', e.target.value);
   });
 }
 
@@ -654,19 +696,38 @@ generateBtn.addEventListener('click', async (e) => {
   const mode = (document.querySelector('input[name="certMode"]:checked') || { value: 'completed' }).value;
   const folderName = `Certificates_${mode}_${new Date().getTime()}`;
   const folder = zip.folder(folderName);
+  const certRecords = []; // Store certificate records for database
 
   try {
     for (let i = 0; i < csvData.length; i++) {
       try {
         updatePreview(csvData[i]);
-        await new Promise(r => setTimeout(r, 100));
+        updateQRAndID(); // Generate new QR code and ID for each certificate
+        
+        // Wait for images to load (QR codes from external API)
+        const qrImg = document.getElementById('qrCodeDisplay');
+        if (qrImg) {
+          await new Promise((resolve) => {
+            if (qrImg.complete) {
+              resolve();
+            } else {
+              qrImg.onload = resolve;
+              qrImg.onerror = resolve;
+              setTimeout(resolve, 500); // Timeout after 500ms
+            }
+          });
+        }
+        
+        await new Promise(r => setTimeout(r, 200));
 
         generateBtn.textContent = `Generating (${i + 1}/${csvData.length})...`;
 
         const cert = document.getElementById('certificate');
         const canvas = await html2canvas(cert, {
           scale: 2,
-          backgroundColor: '#ffffff'
+          backgroundColor: '#ffffff',
+          allowTaint: true,
+          useCORS: true
         });
 
         // Convert canvas to image data
@@ -690,9 +751,18 @@ generateBtn.addEventListener('click', async (e) => {
         const fileName = `Certificate_${csvData[i].name.replace(/\s+/g, '_')}_${mode}.pdf`;
         folder.file(fileName, pdfBlob);
 
+        // Store certificate record for database (WITHOUT pdf data to keep size small)
+        certRecords.push({
+          certificateId: currentCertificateId,
+          studentName: csvData[i].name,
+          course: mode,
+          fileName: fileName,
+          pdfBlob: pdfBlob  // Keep blob reference for later upload
+        });
+
         success++;
       } catch (err) {
-        console.error('Certificate generation error:', err);
+        // console.error('Certificate generation error:', err);
       }
     }
 
@@ -704,6 +774,111 @@ generateBtn.addEventListener('click', async (e) => {
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       const url = URL.createObjectURL(zipBlob);
       
+      // Save certificates to database
+      let dbSaveSuccess = false;
+      let dbErrorMessage = '';
+      if (certRecords.length > 0) {
+        generateBtn.textContent = 'Saving to database...';
+        try {
+          // Step 1: Save certificate metadata (without PDFs)
+          const formData = new FormData();
+          formData.append('action', 'save-batch');
+          
+          // Create records without PDF blobs for metadata save
+          const metadataRecords = certRecords.map(r => ({
+            certificateId: r.certificateId,
+            studentName: r.studentName,
+            course: r.course,
+            fileName: r.fileName
+          }));
+          
+          formData.append('records', JSON.stringify(metadataRecords));
+          formData.append('issueDate', new Date().toISOString().split('T')[0]); // Today's date
+          
+          // console.log('Sending to database:', {
+          //   recordCount: metadataRecords.length,
+          //   records: metadataRecords,
+          //   issueDate: new Date().toISOString().split('T')[0]
+          // });
+          
+          const response = await fetch('./qr/generate-batch.php', {
+            method: 'POST',
+            body: formData
+          });
+          
+          // Check if response is ok
+          if (!response.ok) {
+            dbErrorMessage = `HTTP Error ${response.status}: ${response.statusText}`;
+            throw new Error(dbErrorMessage);
+          }
+          
+          // Get response text first to debug
+          const responseText = await response.text();
+          // console.log('Raw response:', responseText.substring(0, 200));
+          
+          let result;
+          try {
+            result = JSON.parse(responseText);
+          } catch (parseErr) {
+            dbErrorMessage = `Invalid JSON response: ${responseText.substring(0, 100)}`;
+            // console.error('JSON Parse Error:', parseErr);
+            throw new Error(dbErrorMessage);
+          }
+          
+          // console.log('Database response:', result);
+          
+          if (result.success) {
+            dbSaveSuccess = true;
+            // console.log('✅ Database save successful:', result.message);
+            // console.log(`Saved ${result.saved} out of ${result.totalRecords} records`);
+            
+            // Step 2: Upload PDFs separately for each certificate
+            generateBtn.textContent = 'Uploading PDFs...';
+            let pdfsUploaded = 0;
+            for (let i = 0; i < certRecords.length; i++) {
+              try {
+                const record = certRecords[i];
+                const pdfFormData = new FormData();
+                pdfFormData.append('action', 'upload-pdf');
+                pdfFormData.append('certificateId', record.certificateId);
+                pdfFormData.append('pdfFile', record.pdfBlob, record.fileName);
+                
+                const pdfResponse = await fetch('./qr/generate-batch.php', {
+                  method: 'POST',
+                  body: pdfFormData
+                });
+                
+                const pdfText = await pdfResponse.text();
+                const pdfResult = JSON.parse(pdfText);
+                
+                if (pdfResult.success) {
+                  pdfsUploaded++;
+                  // console.log(`✅ PDF uploaded for ${record.certificateId}`);
+                } else {
+                  // console.warn(`⚠️ PDF upload failed for ${record.certificateId}: ${pdfResult.message}`);
+                }
+              } catch (err) {
+                // console.error(`PDF upload error for certificate ${i}:`, err);
+              }
+            }
+            // console.log(`✅ Uploaded ${pdfsUploaded}/${certRecords.length} PDFs`);
+            
+            if (result.errors && result.errors.length > 0) {
+              // console.warn('Errors during save:', result.errors);
+              dbErrorMessage = 'Some records had errors:\n' + result.errors.slice(0, 3).join('\n');
+            }
+          } else {
+            dbErrorMessage = result.message || 'Unknown database error';
+            // console.error('❌ Database save failed:', dbErrorMessage);
+          }
+        } catch (err) {
+          dbErrorMessage = 'Network error: ' + err.message;
+          // console.error('❌ Database request error:', err);
+        }
+      } else {
+        // console.warn('No certificate records to save to database');
+      }
+      
       const link = document.createElement('a');
       link.href = url;
       link.download = `Certificates_${mode}_${new Date().toISOString().split('T')[0]}.zip`;
@@ -713,10 +888,16 @@ generateBtn.addEventListener('click', async (e) => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      alert(`✅ Successfully generated ${success}/${csvData.length} certificates and downloaded as ZIP`);
+      let alertMessage = `✅ Successfully generated ${success}/${csvData.length} certificates\n✅ ZIP downloaded`;
+      if (dbSaveSuccess) {
+        alertMessage += '\n✅ Data saved to database';
+      } else if (dbErrorMessage) {
+        alertMessage += '\n\n❌ Database Error:\n' + dbErrorMessage;
+      }
+      alert(alertMessage);
     }
   } catch (err) {
-    console.error('ZIP generation error:', err);
+    // console.error('ZIP generation error:', err);
     alert('❌ Error generating certificates: ' + err.message);
   }
 
@@ -807,8 +988,20 @@ function initTemplateEditor() {
       
       templateConfig[selectedElement].width = width;
       const el = document.getElementById(selectedElement);
-      el.style.maxWidth = width + 'px';
-      el.style.width = '100%';
+      
+      // For QR code, maintain square aspect ratio
+      if (selectedElement === 'qrCodeDisplay') {
+        el.style.width = width + 'px';
+        el.style.height = width + 'px';
+        el.style.maxWidth = width + 'px';
+      } else if (selectedElement === 'certificateIdDisplay') {
+        // For Certificate ID, only control width
+        el.style.width = width + 'px';
+        el.style.maxWidth = width + 'px';
+      } else {
+        el.style.maxWidth = width + 'px';
+        el.style.width = '100%';
+      }
     });
 
     // bold toggle for student name and signatures
@@ -915,6 +1108,36 @@ function selectElement(elementId) {
     if (elementWidth) elementWidth.value = config.width || 400;
     if (elementWidthValue) elementWidthValue.textContent = (config.width || 400) + 'px';
     
+    // Show/hide controls based on element type
+    const fontSizeField = document.getElementById('fontSizeField');
+    const fontStyleField = document.getElementById('fontStyleField');
+    const boldField = document.getElementById('boldField');
+    const textColorField = document.getElementById('textColorField');
+    const elementWidthField = document.getElementById('elementWidthField');
+    
+    // For QR code: only show position and size controls
+    if (elementId === 'qrCodeDisplay') {
+      if (fontSizeField) fontSizeField.style.display = 'none';
+      if (fontStyleField) fontStyleField.style.display = 'none';
+      if (boldField) boldField.style.display = 'none';
+      if (textColorField) textColorField.style.display = 'none';
+      if (elementWidthField) elementWidthField.style.display = 'block';
+    } else if (elementId === 'certificateIdDisplay') {
+      // For Certificate ID: show only position and width controls
+      if (fontSizeField) fontSizeField.style.display = 'none';
+      if (fontStyleField) fontStyleField.style.display = 'none';
+      if (boldField) boldField.style.display = 'none';
+      if (textColorField) textColorField.style.display = 'none';
+      if (elementWidthField) elementWidthField.style.display = 'block';
+    } else {
+      // For other elements: show all controls
+      if (fontSizeField) fontSizeField.style.display = 'block';
+      if (fontStyleField) fontStyleField.style.display = 'block';
+      if (boldField) boldField.style.display = 'block';
+      if (textColorField) textColorField.style.display = 'block';
+      if (elementWidthField) elementWidthField.style.display = 'block';
+    }
+    
     // Show signature details field only for signature elements
     if (signatureDetailsField) {
       if (elementId === 'sign1PositionDisplay' || elementId === 'sign2PositionDisplay') {
@@ -957,7 +1180,7 @@ function selectElement(elementId) {
 // Draggable & Resizable Elements
 // =====================
 // Add click-to-select for signature position boxes
-['sign1PositionDisplay', 'sign2PositionDisplay'].forEach(id => {
+['sign1PositionDisplay', 'sign2PositionDisplay', 'qrCodeDisplay', 'certificateIdDisplay'].forEach(id => {
   const el = document.getElementById(id);
   if (el) {
     el.classList.add('cert-element');
@@ -976,7 +1199,7 @@ let startX = 0;
 let startY = 0;
 
 function makeDraggable() {
-  const certElements = document.querySelectorAll('.cert-element, .cert-logo, .cert-signature, .cert-signature-position');
+  const certElements = document.querySelectorAll('.cert-element, .cert-logo, .cert-signature, .cert-signature-position, .cert-qr-code, .cert-certificate-id');
   const certificate = document.getElementById('certificate');
   
   certElements.forEach(element => {
@@ -1061,4 +1284,4 @@ if (document.readyState === 'loading') {
   initDraggable();
 }
 
-console.log('✅ main.js loaded with draggable elements and template editor');
+// console.log('✅ main.js loaded with draggable elements and template editor');

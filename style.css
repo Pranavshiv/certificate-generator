@@ -1112,6 +1112,64 @@ button:disabled {
   opacity: 0.8;
 }
 
+/* QR Code Styling */
+.cert-qr-code {
+  position: relative;
+  display: block;
+  width: 120px;
+  height: 120px;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  z-index: 5;
+  cursor: move;
+  user-select: none;
+  transition: none;
+  margin: 20px;
+  background: white;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cert-qr-code:hover {
+  filter: brightness(0.95);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Certificate ID Styling */
+.cert-certificate-id {
+  position: relative;
+  display: block;
+  font-size: 12px;
+  font-family: 'Courier New', monospace;
+  color: #555555;
+  margin: 0;
+  padding: 4px 8px;
+  z-index: 5;
+  cursor: move;
+  user-select: none;
+  transition: none;
+  background: transparent;
+  border: none;
+  text-align: right;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+.cert-certificate-id .label {
+  font-weight: 600;
+  display: inline;
+  font-size: 0.8em;
+  opacity: 0.8;
+}
+
+.cert-certificate-id .value {
+  display: inline;
+  font-weight: 700;
+  font-size: 1.1em;
+  letter-spacing: 1px;
+  color: #333333;
+}
 
 /* responsive */
 
