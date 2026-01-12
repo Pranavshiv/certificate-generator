@@ -60,6 +60,10 @@ const logo2PositionYInput = document.getElementById('logo2PositionY');
 const sign1PositionInput = document.getElementById('sign1Position');
 const sign2PositionInput = document.getElementById('sign2Position');
 
+// Signature position display elements (for certificate preview)
+const sign1PositionDisplay = document.getElementById('sign1PositionDisplay');
+const sign2PositionDisplay = document.getElementById('sign2PositionDisplay');
+
 // Template editor elements
 const elementSelect = document.getElementById('elementSelect');
 const fontSizeInput = document.getElementById('fontSize');
@@ -70,6 +74,8 @@ const textColorInput = document.getElementById('textColor');
 const posXInput = document.getElementById('posX');
 const posYInput = document.getElementById('posY');
 const resetTemplateBtn = document.getElementById('resetTemplateBtn');
+const signatureDetailsField = document.getElementById('signatureDetailsField');
+const signatureDetailsInput = document.getElementById('signatureDetailsInput');
 
 // Step status elements
 const step1Status = document.getElementById('step1Status');
@@ -131,6 +137,68 @@ if (localStorage.getItem('sidebarMinimized') === 'true') {
       <path d="M11 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
   `;
+}
+
+// =====================
+// Signature Details Event Listeners
+// =====================
+// Update signature display elements when textareas change
+function updateSignaturePositionDisplay(elementId) {
+  const inputEl = elementId === 'sign1PositionDisplay' ? sign1PositionInput : sign2PositionInput;
+  const displayEl = elementId === 'sign1PositionDisplay' ? sign1PositionDisplay : sign2PositionDisplay;
+  
+  if (!displayEl || !inputEl) return;
+  
+  const content = inputEl.value ? inputEl.value.trim() : '';
+  if (content) {
+    // Split by newlines and create formatted HTML with proper styling
+    const lines = content.split('\n').filter(line => line.trim());
+    
+    let html = '';
+    lines.forEach((line, index) => {
+      const cleanLine = line.trim();
+      let className = '';
+      
+      // Auto-classify lines (first = name, rest = designation/company)
+      if (index === 0) {
+        className = 'sig-name';
+      } else if (index === 1) {
+        className = 'sig-designation';
+      } else {
+        className = 'sig-company';
+      }
+      
+      html += `<div class="${className}">${cleanLine}</div>`;
+    });
+    
+    displayEl.innerHTML = html;
+  } else {
+    displayEl.innerHTML = `<span style="opacity:0.3;">${elementId === 'sign1PositionDisplay' ? 'Signature 1 details...' : 'Signature 2 details...'}</span>`;
+  }
+}
+
+// Update certificate preview on textarea input (only if elements exist)
+if (sign1PositionInput) {
+  sign1PositionInput.addEventListener('input', () => {
+    updateSignaturePositionDisplay('sign1PositionDisplay');
+  });
+}
+
+if (sign2PositionInput) {
+  sign2PositionInput.addEventListener('input', () => {
+    updateSignaturePositionDisplay('sign2PositionDisplay');
+  });
+}
+
+// Initialize signature displays after DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    updateSignaturePositionDisplay('sign1PositionDisplay');
+    updateSignaturePositionDisplay('sign2PositionDisplay');
+  });
+} else {
+  updateSignaturePositionDisplay('sign1PositionDisplay');
+  updateSignaturePositionDisplay('sign2PositionDisplay');
 }
 
 // =====================
@@ -743,13 +811,14 @@ function initTemplateEditor() {
       el.style.width = '100%';
     });
 
-    // bold toggle for student name
+    // bold toggle for student name and signatures
     boldToggleBtn.addEventListener('click', () => {
       if (!selectedElement) return;
       
-      // Only allow bold toggle for student name
-      if (selectedElement !== 'studentName') {
-        alert('Bold control is only available for the student name');
+      // Allow bold toggle for student name and signatures
+      const allowBold = selectedElement === 'studentName' || selectedElement === 'sign1PositionDisplay' || selectedElement === 'sign2PositionDisplay';
+      if (!allowBold) {
+        alert('Bold control is only available for the student name and signature details');
         return;
       }
       
@@ -800,6 +869,24 @@ function initTemplateEditor() {
         });
       }
     });
+
+    // signature details input change
+    if (signatureDetailsInput) {
+      signatureDetailsInput.addEventListener('input', (e) => {
+        if (!selectedElement) return;
+        if (selectedElement !== 'sign1PositionDisplay' && selectedElement !== 'sign2PositionDisplay') return;
+        
+        const content = e.target.value;
+        // Sync to the original textarea in branding section
+        if (selectedElement === 'sign1PositionDisplay') {
+          sign1PositionInput.value = content;
+          updateSignaturePositionDisplay('sign1PositionDisplay');
+        } else if (selectedElement === 'sign2PositionDisplay') {
+          sign2PositionInput.value = content;
+          updateSignaturePositionDisplay('sign2PositionDisplay');
+        }
+      });
+    }
   }
 }
 
@@ -828,9 +915,23 @@ function selectElement(elementId) {
     if (elementWidth) elementWidth.value = config.width || 400;
     if (elementWidthValue) elementWidthValue.textContent = (config.width || 400) + 'px';
     
-    // handle bold button
+    // Show signature details field only for signature elements
+    if (signatureDetailsField) {
+      if (elementId === 'sign1PositionDisplay' || elementId === 'sign2PositionDisplay') {
+        signatureDetailsField.style.display = 'block';
+        // Populate with current textarea content
+        const inputEl = elementId === 'sign1PositionDisplay' ? sign1PositionInput : sign2PositionInput;
+        if (signatureDetailsInput && inputEl) {
+          signatureDetailsInput.value = inputEl.value;
+        }
+      } else {
+        signatureDetailsField.style.display = 'none';
+      }
+    }
+    
+    // handle bold button - enabled for student name and signatures
     if (boldToggleBtn) {
-      if (elementId === 'studentName') {
+      if (elementId === 'studentName' || elementId === 'sign1PositionDisplay' || elementId === 'sign2PositionDisplay') {
         boldToggleBtn.disabled = false;
         const isBold = config.bold || false;
         if (isBold) {

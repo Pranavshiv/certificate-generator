@@ -877,12 +877,16 @@ button:disabled {
 /* cert-element styling */
 
 .cert-element {
-  transition: all 0.2s ease;
   cursor: move;
   user-select: none;
-  position: relative;
+  position: absolute;
   padding: 4px 8px;
   border-radius: 4px;
+  transition: none;
+  top: auto;
+  left: auto;
+  right: auto;
+  bottom: auto;
 }
 
 .cert-element:hover {
@@ -961,15 +965,17 @@ button:disabled {
 
 .cert-logo {
   position: absolute;
-  top: 20px;
-  right: 30px;
   height: 60px;
   width: auto;
   object-fit: contain;
   z-index: 3;
   cursor: move;
   user-select: none;
-  transition: all 0.2s ease;
+  transition: none;
+  top: 20px;
+  right: 30px;
+  left: auto;
+  bottom: auto;
 }
 
 .cert-logo:hover {
@@ -980,15 +986,17 @@ button:disabled {
 
 .cert-logo-2 {
   position: absolute;
-  top: 20px;
-  left: 30px;
   height: 60px;
   width: auto;
   object-fit: contain;
   z-index: 3;
   cursor: move;
   user-select: none;
-  transition: all 0.2s ease;
+  transition: none;
+  top: 20px;
+  left: 30px;
+  right: auto;
+  bottom: auto;
 }
 
 .cert-logo-2:hover {
@@ -1003,10 +1011,13 @@ button:disabled {
   width: auto;
   object-fit: contain;
   z-index: 3;
-  bottom: 40px;
   cursor: move;
   user-select: none;
-  transition: all 0.2s ease;
+  transition: none;
+  bottom: 40px;
+  top: auto;
+  left: auto;
+  right: auto;
 }
 
 .cert-signature:hover {
@@ -1023,37 +1034,72 @@ button:disabled {
   right: 100px;
 }
 
-
+/* Signature Position/Title Text */
  .cert-signature-position {
   position: absolute;
-  width: 180px;
-  height: 180px;
+  width: auto;
   min-width: 120px;
-  min-height: 120px;
   max-width: 300px;
-  max-height: 300px;
   font-size: 14px;
   font-family: Poppins, Arial, sans-serif;
   color: #333333;
-  text-align: left;
+  text-align: center;
   margin: 0;
-  padding: 10px 12px;
+  padding: 8px 12px;
   z-index: 4;
   user-select: none;
-  bottom: 15px;
-  white-space: pre-line;
   font-weight: 400;
   cursor: move;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   box-shadow: none;
   border: none;
-  transition: all 0.2s ease;
-  line-height: 1.5;
+  transition: none;
+  line-height: 1.6;
   word-break: break-word;
-  overflow: auto;
-  resize: both;
-  aspect-ratio: 1 / 1;
+  white-space: normal;
+  height: auto;
+  top: auto;
+  left: auto;
+  right: auto;
+  bottom: auto;
+}
+
+.cert-signature-position > div {
+  margin: 2px 0;
+  display: block;
+}
+
+/* Default positions (can be dragged anywhere) */
+#sign1PositionDisplay {
+  left: 80px;
+  top: auto;
+  bottom: 50px;
+}
+
+#sign2PositionDisplay {
+  right: 80px;
+  top: auto;
+  bottom: 50px;
+}
+
+.cert-signature-position .sig-name {
+  font-weight: 600;
+  font-size: 1em;
+  letter-spacing: 0.5px;
+}
+
+.cert-signature-position .sig-designation {
+  font-weight: 400;
+  font-size: 0.95em;
+  opacity: 0.9;
+}
+
+.cert-signature-position .sig-company {
+  font-weight: 400;
+  font-size: 0.9em;
+  opacity: 0.85;
+  margin-top: 2px;
 }
 
 .cert-signature-position:hover {
@@ -1170,6 +1216,25 @@ button:disabled {
 }
 
 .number-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.08);
+}
+
+.text-input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--light-grey);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.text-input:focus {
   outline: none;
   border-color: var(--accent);
   background: white;

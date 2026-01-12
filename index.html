@@ -195,10 +195,10 @@
     </section>
 
     <!-- TEMPLATE EDITOR -->
-    <section class="panel step-panel" data-step="3b">
+    <section class="panel step-panel" data-step="3c">
       <div class="panel-header">
-        <h2 class="panel-title">Step 3b · Customize Template</h2>
-        <span class="step-status" id="step3bStatus">✓ Optional</span>
+        <h2 class="panel-title">Step 3c · Customize Template</h2>
+        <span class="step-status" id="step3cStatus">✓ Optional</span>
       </div>
       <p class="hint">Click certificate elements below to customize their appearance, or select from dropdown</p>
       <div class="grid-2">
@@ -246,6 +246,10 @@
         <div class="field">
           <label>Width (px)</label>
           <input type="number" id="elementWidth" min="50" max="800" value="400" class="number-input" placeholder="px">
+        </div>
+        <div class="field" id="signatureDetailsField" style="display: none; grid-column: 1 / -1;">
+          <label>Signature Details</label>
+          <textarea id="signatureDetailsInput" class="text-input" rows="3" placeholder="Enter signature details (names, titles, etc.)"></textarea>
         </div>
         <div class="field">
           <button id="resetTemplateBtn" type="button" class="btn-reset">Reset to Default</button>
