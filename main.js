@@ -20,7 +20,9 @@ let imageSizes = {
 // Template styling storage
 let templateConfig = {
   studentName: { fontSize: 48, color: '#1a1a1a', posX: 0, posY: 0, width: 600, fontFamily: 'Poppins', bold: false },
-  customTextDisplay: { fontSize: 14, color: '#333333', posX: 0, posY: 0, width: 800, fontFamily: 'Poppins', bold: false }
+  customTextDisplay: { fontSize: 14, color: '#333333', posX: 0, posY: 0, width: 800, fontFamily: 'Poppins', bold: false },
+  sign1PositionDisplay: { fontSize: 13, color: '#333333', posX: 100, posY: 0, width: 200, fontFamily: 'Poppins', bold: false },
+  sign2PositionDisplay: { fontSize: 13, color: '#333333', posX: 100, posY: 0, width: 200, fontFamily: 'Poppins', bold: false }
 };
 
 let selectedElement = null;
@@ -453,25 +455,46 @@ sign2FileInput.addEventListener('change', e => {
 
 // =====================
 // =====================
-// Signature Position/Title
+// Signature Position/Title (with template editor support)
 // =====================
+function updateSignaturePositionDisplay(id, value) {
+  const el = document.getElementById(id);
+  if (el) {
+    // If value is empty or only whitespace, show a placeholder to keep box visible
+    const safeValue = value.replace(/\n/g, '<br>');
+    if (safeValue.replace(/<br>/g, '').trim() === '') {
+      el.innerHTML = `<span style="opacity:0.3;">${id === 'sign1PositionDisplay' ? 'Signature 1 details...' : 'Signature 2 details...'}</span>`;
+    } else {
+      el.innerHTML = safeValue;
+    }
+    el.style.display = 'block';
+    el.style.minHeight = '40px';
+    // Restore position from templateConfig every update
+    const config = templateConfig[id];
+    if (config) {
+      el.style.fontSize = config.fontSize + 'px';
+      el.style.color = config.color;
+      el.style.fontFamily = config.fontFamily;
+      el.style.fontWeight = config.bold ? '700' : '500';
+      el.style.maxWidth = config.width + 'px';
+      el.style.width = '100%';
+      el.style.left = (config.posX || 0) + 'px';
+      el.style.top = (config.posY || 0) + 'px';
+    }
+  }
+}
+
 if (sign1PositionInput) {
   sign1PositionInput.addEventListener('input', (e) => {
-    const sign1PosEl = document.getElementById('sign1PositionDisplay');
-    if (sign1PosEl) {
-      sign1PosEl.textContent = e.target.value;
-      console.log('Signature 1 position updated:', e.target.value);
-    }
+    updateSignaturePositionDisplay('sign1PositionDisplay', e.target.value);
+    console.log('Signature 1 position updated:', e.target.value);
   });
 }
 
 if (sign2PositionInput) {
   sign2PositionInput.addEventListener('input', (e) => {
-    const sign2PosEl = document.getElementById('sign2PositionDisplay');
-    if (sign2PosEl) {
-      sign2PosEl.textContent = e.target.value;
-      console.log('Signature 2 position updated:', e.target.value);
-    }
+    updateSignaturePositionDisplay('sign2PositionDisplay', e.target.value);
+    console.log('Signature 2 position updated:', e.target.value);
   });
 }
 
@@ -493,12 +516,21 @@ function updatePreview(record) {
 }
 
 function applyStoredPositions() {
+  const certificate = document.getElementById('certificate');
+  const certRect = certificate ? certificate.getBoundingClientRect() : { width: 1200, height: 840 };
   Object.keys(templateConfig).forEach(elementId => {
     const el = document.getElementById(elementId);
     if (el && templateConfig[elementId]) {
       const config = templateConfig[elementId];
-      if (config.posX) el.style.left = config.posX + 'px';
-      if (config.posY) el.style.top = config.posY + 'px';
+      // Clamp initial position so box stays inside template
+      let left = config.posX || 0;
+      let top = config.posY || 0;
+      const boxWidth = el.offsetWidth || 180;
+      const boxHeight = el.offsetHeight || 180;
+      left = Math.max(0, Math.min(left, certRect.width - boxWidth));
+      top = Math.max(0, Math.min(top, certRect.height - boxHeight));
+      el.style.left = left + 'px';
+      el.style.top = top + 'px';
       if (config.width) {
         el.style.maxWidth = config.width + 'px';
         el.style.width = '100%';
@@ -823,6 +855,19 @@ function selectElement(elementId) {
 // =====================
 // Draggable & Resizable Elements
 // =====================
+// Add click-to-select for signature position boxes
+['sign1PositionDisplay', 'sign2PositionDisplay'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.add('cert-element');
+    el.setAttribute('data-element', id);
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectElement(id);
+    });
+  }
+});
+
 let draggedElement = null;
 let offsetX = 0;
 let offsetY = 0;
@@ -860,17 +905,20 @@ function makeDraggable() {
   
   document.addEventListener('mousemove', (e) => {
     if (!draggedElement) return;
-    
+
     const certificate = document.getElementById('certificate');
     const certRect = certificate.getBoundingClientRect();
-    
+    const elemRect = draggedElement.getBoundingClientRect();
+
     let x = e.clientX - certRect.left - offsetX;
     let y = e.clientY - certRect.top - offsetY;
-    
-    // Clamp position within certificate bounds
-    x = Math.max(0, Math.min(x, certRect.width - draggedElement.offsetWidth));
-    y = Math.max(0, Math.min(y, certRect.height - draggedElement.offsetHeight));
-    
+
+    // Clamp position so the entire box stays inside the certificate
+    const maxX = certRect.width - elemRect.width;
+    const maxY = certRect.height - elemRect.height;
+    x = Math.max(0, Math.min(x, maxX > 0 ? maxX : 0));
+    y = Math.max(0, Math.min(y, maxY > 0 ? maxY : 0));
+
     draggedElement.style.left = x + 'px';
     draggedElement.style.top = y + 'px';
   });

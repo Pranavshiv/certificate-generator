@@ -1023,21 +1023,37 @@ button:disabled {
   right: 100px;
 }
 
-.cert-signature-position {
+
+ .cert-signature-position {
   position: absolute;
-  font-size: 12px;
+  width: 180px;
+  height: 180px;
+  min-width: 120px;
+  min-height: 120px;
+  max-width: 300px;
+  max-height: 300px;
+  font-size: 14px;
   font-family: Poppins, Arial, sans-serif;
   color: #333333;
-  text-align: center;
+  text-align: left;
   margin: 0;
-  padding: 0;
+  padding: 10px 12px;
   z-index: 4;
   user-select: none;
   bottom: 15px;
-  white-space: nowrap;
-  font-weight: 500;
+  white-space: pre-line;
+  font-weight: 400;
   cursor: move;
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: none;
+  border: none;
   transition: all 0.2s ease;
+  line-height: 1.5;
+  word-break: break-word;
+  overflow: auto;
+  resize: both;
+  aspect-ratio: 1 / 1;
 }
 
 .cert-signature-position:hover {
@@ -1050,15 +1066,6 @@ button:disabled {
   opacity: 0.8;
 }
 
-.cert-signature-position-1 {
-  left: 100px;
-  transform: translateX(-50%);
-}
-
-.cert-signature-position-2 {
-  right: 100px;
-  transform: translateX(50%);
-}
 
 /* responsive */
 
